@@ -50,8 +50,7 @@ void SandboxLayer::OnAttach()
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-
-
+	
 	// Init here
 }
 
@@ -92,18 +91,20 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 
 	glm::mat4 model = glm::mat4(1.0f) ;
-	model = glm::rotate(model, -35.0f, glm::vec3(1.0, 0.0, 0.0));
 	unsigned int modelMatrix = glGetUniformLocation(m_shader->GetRendererID(), "model");
+	model = glm::rotate(model, -35.0f, glm::vec3(1.0, 0.0, 0.0));
 	glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(model));
 
 
+		
 	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0, 0.0, -3.0f));
+	view = glm::translate(view, glm::vec3(0.0, 0.0, -12.0f));
+	view = glm::rotate(view, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	unsigned int viewMatrix = glGetUniformLocation(m_shader->GetRendererID(), "view");
 	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(view));
 
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(75.0f),(float)(1600 / 1200), 0.1f, 10.0f);
+	projection = glm::perspective(glm::radians(40.0f),(float)(1600 / 1200), 0.1f, 100.0f);
 	unsigned int projMatrix = glGetUniformLocation(m_shader->GetRendererID(), "projection");
 	glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -111,7 +112,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	unsigned int transformLoc = glGetUniformLocation(m_shader->GetRendererID(), "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-	glClearColor(0.0f, 0.9f, 0.0f, 1.0f);
+	glClearColor(0.621f, 0.648f, 0.628f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 
@@ -122,28 +123,89 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 
 	float vertices[] = {
-				 0.5f , 0.5f, 0.0f , 1.0 , 1.0 ,// bottom right
-			 	 0.5f ,-0.5f, 0.0f , 1.0 , 0.0 , // bottom left
-				-0.5f ,-0.5f, 0.0f , 0.0f, 0.0 ,
-				-0.5f , 0.5f, 0.0f , 0.0f, 1.0f};
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+	//
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(2.0f, 5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f, 3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f, 2.0f, -2.5f),
+		glm::vec3(1.5f, 0.2f, -1.5f),
+		glm::vec3(-1.3f, 1.0f, -1.5f)
+								};
+
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	for(unsigned int i = 0; i < 10; i++)
+	{
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, cubePositions[i]);
+		float angle = 20.0f * i;
+		model = glm::rotate(model, glm::radians(-angle), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model * trans));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
 
 
 	trans = glm::mat4(1.0f);
+	trans = glm::translate(trans, glm::vec3(-0.5f, 0.75f, 0.0f));
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-
-	//trans = glm::mat4(1.0f);
-	//trans = glm::translate(trans, glm::vec3(0.0f, 0.5f, 0.0f));
-	//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-	//glDrawElements(GL_TRIANGLES, 6 , GL_UNSIGNED_INT , 0 );
 }
 
 void SandboxLayer::OnImGuiRender()

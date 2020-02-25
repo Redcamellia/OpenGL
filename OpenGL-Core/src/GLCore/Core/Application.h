@@ -16,7 +16,7 @@ namespace GLCore {
 	class Application
 	{
 	public:
-		Application(const std::string& name = "OpenGL Sandbox", uint32_t width = 1600, uint32_t height = 1200);
+		Application(const std::string& name = "OpenGL Sandbox", uint32_t width = 1920, uint32_t height = 1440);
 		virtual ~Application() = default;
 
 		void Run();
