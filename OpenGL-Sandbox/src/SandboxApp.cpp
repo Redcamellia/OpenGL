@@ -6,7 +6,7 @@ using namespace GLCore;
 class Sandbox : public Application
 {
 public:
-	Sandbox()
+	Sandbox() : Application("my rectangle")
 	{
 		PushLayer(new SandboxLayer());
 	}
@@ -15,5 +15,8 @@ public:
 int main()
 {
 	std::unique_ptr<Sandbox> app = std::make_unique<Sandbox>();
+
+	
+
 	app->Run();
 }
