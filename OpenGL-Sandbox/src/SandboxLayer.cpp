@@ -90,7 +90,23 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()/2), cos(glfwGetTime()/2), 0.0f));
 	trans = glm::rotate(trans,  ((float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
 
-	
+
+	glm::mat4 model = glm::mat4(1.0f) ;
+	model = glm::rotate(model, -35.0f, glm::vec3(1.0, 0.0, 0.0));
+	unsigned int modelMatrix = glGetUniformLocation(m_shader->GetRendererID(), "model");
+	glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(model));
+
+
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0, 0.0, -3.0f));
+	unsigned int viewMatrix = glGetUniformLocation(m_shader->GetRendererID(), "view");
+	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(view));
+
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(75.0f),(float)(1600 / 1200), 0.1f, 10.0f);
+	unsigned int projMatrix = glGetUniformLocation(m_shader->GetRendererID(), "projection");
+	glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(projection));
+
 
 	unsigned int transformLoc = glGetUniformLocation(m_shader->GetRendererID(), "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
@@ -101,10 +117,6 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 	timeTracker += ts.GetSeconds();
 
-		m_SquareColor[0] = 0.8f;
-		m_SquareColor[1] = 0.5f;
-		m_SquareColor[2] = (sin(timeTracker) / 2.0f) + 0.5f;
-	
 	int vertexColorLocation = glGetUniformLocation(m_shader->GetRendererID(), "ourColor");
 	glUniform4fv(vertexColorLocation,1 , glm::value_ptr(m_SquareColor));
 
