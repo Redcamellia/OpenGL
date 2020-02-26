@@ -2,7 +2,7 @@
 
 #include "GLCore/Core/Window.h"
 
-#include <GLFW/glfw3.h>
+#include "C:\\Users\\Camellia\\Desktop\\OpenGL\\OpenGL-Core\\vendor\glfw\\include\\GLFW\\glfw3.h"
 
 namespace GLCore {
 

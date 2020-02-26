@@ -1,6 +1,7 @@
 #include "SandboxLayer.h"
 #include "../glfw/include/GLFW/glfw3.h"
 #include "stb_image/stb_image.h"
+#include "../src/Platform/Windows/WindowsWindow.h"
 using namespace GLCore;
 using namespace GLCore::Utils;
 
@@ -49,7 +50,6 @@ void SandboxLayer::OnAttach()
 	};
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 	
 	// Init here
 }
@@ -85,9 +85,9 @@ void SandboxLayer::OnEvent(Event& event)
 void SandboxLayer::OnUpdate(Timestep ts)
 {
 	glUseProgram(m_shader->GetRendererID());
-
+	m_CameraController.OnUpdate(ts);
 	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()/2), cos(glfwGetTime()/2), 0.0f));
+	trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()), 0.0f));
 	trans = glm::rotate(trans,  ((float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
 
 
@@ -96,22 +96,16 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	model = glm::rotate(model, -35.0f, glm::vec3(1.0, 0.0, 0.0));
 	glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(model));
 
-
+	std::cout << m_CameraController.GetCamera().GetPosition().x << "  " <<
+		m_CameraController.GetCamera().GetPosition().y << "  " <<
+		m_CameraController.GetCamera().GetPosition().z << "  " << std::endl;
 		
-	glm::mat4 view = glm::mat4(1.0f);
-	//view = glm::translate(view, glm::vec3(0.0, 0.0, -6.0f));
-	//view = glm::rotate(view, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	float radius = 30.0f;
-	view = glm::lookAt(glm::vec3(sin(glfwGetTime()) * radius, 0.0f, cos(glfwGetTime()) * radius)
-		, glm::vec3(0.0f, 0.0f, 0.0f)
-		, glm::vec3(0.0f, 1.0f, 0.0f));
-	unsigned int viewMatrix = glGetUniformLocation(m_shader->GetRendererID(), "view");
-	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(view));
-
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(40.0f),(float)(1600 / 1200), 0.1f, 100.0f);
 	unsigned int projMatrix = glGetUniformLocation(m_shader->GetRendererID(), "projection");
-	glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(m_CameraController.GetCamera().GetProjectionMatrix()));
+	unsigned int viewMatrix = glGetUniformLocation(m_shader->GetRendererID(), "view");
+	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(m_CameraController.GetCamera().GetViewMatrix()));
+
+
 
 
 	unsigned int transformLoc = glGetUniformLocation(m_shader->GetRendererID(), "transform");
@@ -201,6 +195,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 		model = glm::translate(model, cubePositions[i]);
 		float angle = 20.0f * i;
 		model = glm::rotate(model, glm::radians(-angle), glm::vec3(1.0f, 0.0f, 0.0f));
+		trans = glm::mat4(1.0f);
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model * trans));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}

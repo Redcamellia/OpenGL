@@ -1,3 +1,4 @@
+#include "../glfw/include/GLFW/glfw3.h"
 #include "glpch.h"
 #include "OrthographicCamera.h"
 
@@ -6,15 +7,20 @@
 namespace GLCore::Utils {
 
 	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top)
-		: m_ProjectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 1.0f)), m_ViewMatrix(1.0f)
+		:
+		m_ViewMatrix(glm::lookAt(m_Position
+			, glm::vec3(0.0f, 0.0f, 0.0f)
+			, glm::vec3(0.0f, 1.0f, 0.0f))),
+		
+		m_ProjectionMatrix(glm::perspective(glm::radians(40.0f) , (float)(1600/1200) , 0.1f , 100.0f))
 	{
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	void OrthographicCamera::SetProjection(float left, float right, float bottom, float top)
 	{
-		m_ProjectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+		//m_ProjectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
+		//m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	void OrthographicCamera::RecalculateViewMatrix()

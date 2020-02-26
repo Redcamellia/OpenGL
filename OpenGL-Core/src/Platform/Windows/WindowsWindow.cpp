@@ -52,7 +52,7 @@ namespace GLCore {
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		GLCORE_ASSERT(status, "Failed to initialize Glad!");
 
-		LOG_INFO("OpenGL Info:");
+		LOG_INFO("  OpenGL Info:");
 		LOG_INFO("  Vendor: {0}", glGetString(GL_VENDOR));
 		LOG_INFO("  Renderer: {0}", glGetString(GL_RENDERER));
 		LOG_INFO("  Version: {0}", glGetString(GL_VERSION));
