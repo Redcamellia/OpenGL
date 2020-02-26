@@ -98,8 +98,12 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 		
 	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0, 0.0, -12.0f));
-	view = glm::rotate(view, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//view = glm::translate(view, glm::vec3(0.0, 0.0, -6.0f));
+	//view = glm::rotate(view, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	float radius = 30.0f;
+	view = glm::lookAt(glm::vec3(sin(glfwGetTime()) * radius, 0.0f, cos(glfwGetTime()) * radius)
+		, glm::vec3(0.0f, 0.0f, 0.0f)
+		, glm::vec3(0.0f, 1.0f, 0.0f));
 	unsigned int viewMatrix = glGetUniformLocation(m_shader->GetRendererID(), "view");
 	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(view));
 
