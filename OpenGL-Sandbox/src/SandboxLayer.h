@@ -21,8 +21,8 @@ private:
 	glm::vec4 m_SquareColor = m_SquareBaseColor;
 
 	GLCore::Utils::Shader * m_shader;
-	GLuint VAO;
-	GLuint VBO;
-	GLuint EBO;
+	GLuint VAO; // vertex array object
+	GLuint VBO; // vertex buffer object
+	GLuint EBO; // element buffer object
 	float timeTracker = 0;
 };

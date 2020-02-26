@@ -74,6 +74,8 @@ void ExampleLayer::OnEvent(Event& event)
 			m_SquareColor = m_SquareBaseColor;
 			return false;
 		});
+	
+
 }
 
 void ExampleLayer::OnUpdate(Timestep ts)
