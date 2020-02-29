@@ -20,6 +20,8 @@ namespace GLCore::Utils {
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
+		void setViewMatrix(glm::mat4& view);
+
 	private:
 		void RecalculateViewMatrix();
 	private:
@@ -29,6 +31,9 @@ namespace GLCore::Utils {
 
 		glm::vec3 m_Position = { 0.0f, 0.0f, 30.0f };
 		float m_Rotation = 0.0f;
+		glm::vec3 m_camera_front = { 0.0f ,0.0f ,-1.0f };
+		float m_yaw;
+		float m_pitch;
 	};
 
 }

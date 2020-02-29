@@ -9,10 +9,10 @@ namespace GLCore::Utils {
 	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top)
 		:
 		m_ViewMatrix(glm::lookAt(m_Position
-			, glm::vec3(0.0f, 0.0f, 0.0f)
+			, m_camera_front + m_Position
 			, glm::vec3(0.0f, 1.0f, 0.0f))),
 		
-		m_ProjectionMatrix(glm::perspective(glm::radians(40.0f) , (float)(1600/1200) , 0.1f , 100.0f))
+		m_ProjectionMatrix(glm::perspective(glm::radians(40.0f) , (float)(1600/1200) , 0.1f , 1000.0f))
 	{
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
@@ -21,6 +21,11 @@ namespace GLCore::Utils {
 	{
 		//m_ProjectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
 		//m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+	}
+
+	void OrthographicCamera::setViewMatrix(glm::mat4& view)
+	{
+		m_ViewMatrix = view;
 	}
 
 	void OrthographicCamera::RecalculateViewMatrix()
@@ -33,3 +38,4 @@ namespace GLCore::Utils {
 	}
 
 }
+

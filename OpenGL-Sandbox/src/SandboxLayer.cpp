@@ -5,6 +5,16 @@
 using namespace GLCore;
 using namespace GLCore::Utils;
 
+double xpos;
+double ypos;
+
+void mouse_callback(GLFWwindow* window, double x, double y )
+{
+	xpos = x;
+	ypos = y;
+}
+
+
 SandboxLayer::SandboxLayer()
 : m_CameraController(16.0f / 9.0f)
 {
@@ -48,9 +58,15 @@ void SandboxLayer::OnAttach()
 		  0 , 1 , 3
 		, 1 , 2 , 3
 	};
+	glfwSetCursorPosCallback((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
+		,mouse_callback);
 
+	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
+			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	
+	
+
 	// Init here
 }
 
@@ -85,9 +101,13 @@ void SandboxLayer::OnEvent(Event& event)
 void SandboxLayer::OnUpdate(Timestep ts)
 {
 	glUseProgram(m_shader->GetRendererID());
+
+
+
 	m_CameraController.OnUpdate(ts);
 	glm::mat4 trans = glm::mat4(1.0f);
 	trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()), 0.0f));
+	trans = glm::translate(trans, glm::vec3(5.0f, 0.0f, 1.5f));
 	trans = glm::rotate(trans,  ((float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
 
 
@@ -95,15 +115,20 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	unsigned int modelMatrix = glGetUniformLocation(m_shader->GetRendererID(), "model");
 	model = glm::rotate(model, -35.0f, glm::vec3(1.0, 0.0, 0.0));
 	glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(model));
+	
 
-	std::cout << m_CameraController.GetCamera().GetPosition().x << "  " <<
-		m_CameraController.GetCamera().GetPosition().y << "  " <<
-		m_CameraController.GetCamera().GetPosition().z << "  " << std::endl;
+	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(xpos/100)), glm::vec3(0.0f, 1.0f, 0.0f)));
+	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(ypos/100)), glm::vec3(1.0f, 0.0f, 0.0f)));
+	//std::cout << "logging x coord : " << xpos << "  logging y coord : " << ypos << std::endl;
 		
 	unsigned int projMatrix = glGetUniformLocation(m_shader->GetRendererID(), "projection");
 	glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(m_CameraController.GetCamera().GetProjectionMatrix()));
 	unsigned int viewMatrix = glGetUniformLocation(m_shader->GetRendererID(), "view");
-	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(m_CameraController.GetCamera().GetViewMatrix()));
+	
+	glm::mat4 tabdil = m_CameraController.GetCamera().GetViewMatrix();
+
+	tabdil = glm::rotate(tabdil, glm::radians(-0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(tabdil));
 
 
 
@@ -119,6 +144,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 	int vertexColorLocation = glGetUniformLocation(m_shader->GetRendererID(), "ourColor");
 	glUniform4fv(vertexColorLocation,1 , glm::value_ptr(m_SquareColor));
+
 
 
 	float vertices[] = {
@@ -175,21 +201,14 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glBindVertexArray(VAO);
 
 	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(2.0f, 5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f, 3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f, 2.0f, -2.5f),
-		glm::vec3(1.5f, 0.2f, -1.5f),
-		glm::vec3(-1.3f, 1.0f, -1.5f)
+		//glm::vec3(2.0f, 5.0f, -15.0f),
+		//glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(-1.7f, 3.0f, -7.5f)
 								};
 
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	for(unsigned int i = 0; i < 10; i++)
+	for(unsigned int i = 0; i < 1; i++)
 	{
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, cubePositions[i]);
@@ -206,6 +225,19 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	GLfloat triangle[] = {
+		-60.75 , -80.75 , 20.1 ,0.0f , 0.0f ,
+		60.75 , -80.75 , 20.1, 1.0f ,0.0f ,
+		00.0f , 40.75 , 20.1 , 0.0f , 1.0f 
+	};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void SandboxLayer::OnImGuiRender()
