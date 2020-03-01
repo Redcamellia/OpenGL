@@ -29,43 +29,85 @@ void SandboxLayer::OnAttach()
 {
 	EnableGLDebugging();
 	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert", "assets/shaders/frag.frag");
+	m_light_shader = Shader::FromGLSLTextFiles("assets/shaders/lightVertex.vert", "assets/shaders/lightFragment.frag");
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+	float vertices[] = {
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
 	int width, height, nrChannel;
-
 	unsigned char * data = stbi_load("wallTexture.jpg", &width, &height, &nrChannel,0);
-
-
 	GLuint texture;
 	glGenTextures(1, &texture);
-
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 	glBindTexture(GL_TEXTURE_2D, texture);
-
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-	unsigned int indices[] = {
-		  0 , 1 , 3
-		, 1 , 2 , 3
-	};
 	glfwSetCursorPosCallback((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 		,mouse_callback);
 
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	
-	
+	glGenVertexArrays(1, &lightVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindVertexArray(lightVAO);
+
+	// we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
+
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
 	// Init here
 }
@@ -102,104 +144,44 @@ void SandboxLayer::OnUpdate(Timestep ts)
 {
 	glUseProgram(m_shader->GetRendererID());
 
-
-
 	m_CameraController.OnUpdate(ts);
 	glm::mat4 trans = glm::mat4(1.0f);
 	trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()), 0.0f));
 	trans = glm::translate(trans, glm::vec3(5.0f, 0.0f, 1.5f));
 	trans = glm::rotate(trans,  ((float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
-
+	m_shader->setMat4("tansform", trans);
 
 	glm::mat4 model = glm::mat4(1.0f) ;
-	unsigned int modelMatrix = glGetUniformLocation(m_shader->GetRendererID(), "model");
 	model = glm::rotate(model, -35.0f, glm::vec3(1.0, 0.0, 0.0));
-	glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(model));
+	m_shader->setMat4("model", model);
+
 	
 
 	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(xpos/100)), glm::vec3(0.0f, 1.0f, 0.0f)));
 	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(ypos/100)), glm::vec3(1.0f, 0.0f, 0.0f)));
 	//std::cout << "logging x coord : " << xpos << "  logging y coord : " << ypos << std::endl;
 		
-	unsigned int projMatrix = glGetUniformLocation(m_shader->GetRendererID(), "projection");
-	glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(m_CameraController.GetCamera().GetProjectionMatrix()));
-	unsigned int viewMatrix = glGetUniformLocation(m_shader->GetRendererID(), "view");
-	
+
+	m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
 	glm::mat4 tabdil = m_CameraController.GetCamera().GetViewMatrix();
-
 	tabdil = glm::rotate(tabdil, glm::radians(-0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(tabdil));
+	m_shader->setMat4("view", tabdil);
 
 
-
-
-	unsigned int transformLoc = glGetUniformLocation(m_shader->GetRendererID(), "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
-	glClearColor(0.621f, 0.648f, 0.628f, 1.0f);
+	//glClearColor(0.621f, 0.648f, 0.628f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-
 	timeTracker += ts.GetSeconds();
 
-	int vertexColorLocation = glGetUniformLocation(m_shader->GetRendererID(), "ourColor");
-	glUniform4fv(vertexColorLocation,1 , glm::value_ptr(m_SquareColor));
+	m_shader->setVec4("ourColor", m_SquareColor);
 
-
-
-	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
 	//
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glBindVertexArray(VAO);
 
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBindVertexArray(VAO);
+	glEnableVertexAttribArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glm::vec3 cubePositions[] = {
 		//glm::vec3(2.0f, 5.0f, -15.0f),
 		//glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -207,7 +189,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 								};
 
 
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+
 	for(unsigned int i = 0; i < 1; i++)
 	{
 		model = glm::mat4(1.0f);
@@ -215,29 +197,29 @@ void SandboxLayer::OnUpdate(Timestep ts)
 		float angle = 20.0f * i;
 		model = glm::rotate(model, glm::radians(-angle), glm::vec3(1.0f, 0.0f, 0.0f));
 		trans = glm::mat4(1.0f);
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model * trans));
+		trans = glm::translate(trans , glm::vec3(5.0f, 0.0f, 15.0f));
+		m_shader->setMat4("transform", trans);
+		m_shader->setMat4("model", model);
+		m_shader->setVec4("ourColor", glm::vec4(0.0f, 0.7f, 0.4f, 1.0f));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
 
+	glUseProgram(m_light_shader->GetRendererID());
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBindVertexArray(lightVAO);
+	glEnableVertexAttribArray(0);
+
+	m_light_shader->setMat4("model", model);
+	m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
+	m_light_shader->setMat4("view", tabdil);
 	trans = glm::mat4(1.0f);
 	trans = glm::translate(trans, glm::vec3(-0.5f, 0.75f, 0.0f));
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	m_light_shader->setMat4("transform", trans);
+
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	GLfloat triangle[] = {
-		-60.75 , -80.75 , 20.1 ,0.0f , 0.0f ,
-		60.75 , -80.75 , 20.1, 1.0f ,0.0f ,
-		00.0f , 40.75 , 20.1 , 0.0f , 1.0f 
-	};
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+
 }
 
 void SandboxLayer::OnImGuiRender()
