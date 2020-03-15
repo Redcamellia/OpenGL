@@ -15,13 +15,13 @@ namespace GLCore::Utils {
 	{
 		if (Input::IsKeyPressed(HZ_KEY_A))
 		{
-			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed *6* ts;
-			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed *6* ts;
+			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
+			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_D))
 		{
-			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed *6* ts;
-			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed *6* ts;
+			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
+			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
 		}
 
 		if (Input::IsKeyPressed(HZ_KEY_W))
