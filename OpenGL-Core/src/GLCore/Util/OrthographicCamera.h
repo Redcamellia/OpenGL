@@ -21,6 +21,8 @@ namespace GLCore::Utils {
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 		void setViewMatrix(glm::mat4& view);
+		void setCameraFront(glm::vec3& front);
+		const glm::vec3& GetCameraFront();
 
 	private:
 		void RecalculateViewMatrix();

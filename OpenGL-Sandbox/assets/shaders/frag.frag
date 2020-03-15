@@ -34,12 +34,12 @@ void main(void)
 //    }
 
     float fuck_me = dot(viewDir , ReflectDir) ;
-    float spec = pow(max(fuck_me, 0.0f ), 128);
+    float spec = pow(max(fuck_me, 0.0f ), 32);
     vec3 specular = specularStrength * spec * lightColor ;
 
 
 
-    vec3 result =  (/*ambient+diffuse+*/specular) * ourColor;
+    vec3 result =  (ambient+diffuse+specular) * ourColor;
     color = vec4(result , 1.0f);
 
 }

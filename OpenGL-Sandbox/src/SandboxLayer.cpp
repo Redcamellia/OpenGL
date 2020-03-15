@@ -5,13 +5,29 @@
 using namespace GLCore;
 using namespace GLCore::Utils;
 
-double xpos;
-double ypos;
+double xpos = 0;
+double ypos = 0;
+double xoffset = 0;
+double yoffset = 0;
+bool first_mouse = true;
 
+double prxpos = 0;
+double prypos = 0;
 void mouse_callback(GLFWwindow* window, double x, double y )
 {
-	xpos = x;
-	ypos = y;
+	if (first_mouse) {
+		prxpos = x;
+		prypos = y;
+		first_mouse = false;
+	
+	}
+	std::cout << x << "   " << y << std::endl;
+	xoffset = x - prxpos;
+	yoffset = y - prypos;
+
+	prxpos = x;
+	prypos = y;
+
 }
 
 
@@ -142,10 +158,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glm::mat4 model = glm::mat4(1.0f);
 	m_shader->setMat4("model", model);
 
-
-
-	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(xpos / 100)), glm::vec3(0.0f, 1.0f, 0.0f)));
-	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(ypos / 100)), glm::vec3(1.0f, 0.0f, 0.0f)));
+		m_CameraController.GetCamera().setCameraFront(glm::normalize(m_CameraController.GetCamera().GetCameraFront() + glm::vec3(xoffset / 6000, 0.0f, 0.0f)));
+		m_CameraController.GetCamera().setCameraFront(glm::normalize(m_CameraController.GetCamera().GetCameraFront() + glm::vec3(0.0f, -yoffset / 6000, 0.0f)));
 
 
 	m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
@@ -165,7 +179,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glm::vec3(2.0f, -1.5f, -7.0f)
 	};
 	m_shader->setVec3("lightPos", cubePositions[0]);
-	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition() - glm::vec3(-0.5f , 0.4f ,0.0f));
+	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition() /*- glm::vec3(-0.5f , 0.4f ,0.0f)*/);
 	//
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

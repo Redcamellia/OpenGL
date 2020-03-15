@@ -28,6 +28,19 @@ namespace GLCore::Utils {
 		m_ViewMatrix = view;
 	}
 
+
+
+	void OrthographicCamera::setCameraFront(glm::vec3& front)
+	{
+		m_camera_front = front;
+		m_ViewMatrix = glm::mat4(glm::lookAt(m_Position, m_camera_front + m_Position, glm::vec3(0.0f, 1.0f, 0.0f)));
+	}
+
+	const glm::vec3& OrthographicCamera::GetCameraFront()
+	{
+		return m_camera_front;
+	}
+
 	void OrthographicCamera::RecalculateViewMatrix()
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position) *
