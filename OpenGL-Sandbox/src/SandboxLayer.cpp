@@ -5,29 +5,13 @@
 using namespace GLCore;
 using namespace GLCore::Utils;
 
-double xpos = 0;
-double ypos = 0;
-double xoffset = 0;
-double yoffset = 0;
-bool first_mouse = true;
+double xpos;
+double ypos;
 
-double prxpos = 0;
-double prypos = 0;
 void mouse_callback(GLFWwindow* window, double x, double y )
 {
-	if (first_mouse) {
-		prxpos = x;
-		prypos = y;
-		first_mouse = false;
-	
-	}
-	std::cout << x << "   " << y << std::endl;
-	xoffset = x - prxpos;
-	yoffset = y - prypos;
-
-	prxpos = x;
-	prypos = y;
-
+	xpos = x;
+	ypos = y;
 }
 
 
@@ -158,8 +142,10 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glm::mat4 model = glm::mat4(1.0f);
 	m_shader->setMat4("model", model);
 
-		m_CameraController.GetCamera().setCameraFront(glm::normalize(m_CameraController.GetCamera().GetCameraFront() + glm::vec3(xoffset / 6000, 0.0f, 0.0f)));
-		m_CameraController.GetCamera().setCameraFront(glm::normalize(m_CameraController.GetCamera().GetCameraFront() + glm::vec3(0.0f, -yoffset / 6000, 0.0f)));
+
+
+	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(xpos / 100)), glm::vec3(0.0f, 1.0f, 0.0f)));
+	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(ypos / 100)), glm::vec3(1.0f, 0.0f, 0.0f)));
 
 
 	m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
@@ -167,19 +153,36 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setMat4("view", tabdil);
 
 
-	glClearColor(0.621f, 0.648f, 0.628f, 1.0f);
+	//glClearColor(0.621f, 0.648f, 0.628f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	timeTracker += ts.GetSeconds();
 
-	m_shader->setVec3("ourColor", glm::vec3{ 1.0f, 0.3f, 0.2f });
-	m_shader->setVec3("lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
+	//m_shader->setVec3("ourColor", glm::vec3{ 1.0f, 0.3f, 0.2f });
+	//m_shader->setVec3("lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
 	trans = glm::mat4(1.0f);
 	trans = glm::translate(trans, glm::vec3(6.5f, -5.75f, 19.0f));
 	glm::vec3 cubePositions[] = {
 	glm::vec3(2.0f, -1.5f, -7.0f)
 	};
-	m_shader->setVec3("lightPos", cubePositions[0]);
-	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition() /*- glm::vec3(-0.5f , 0.4f ,0.0f)*/);
+	m_shader->setVec3("light.position", cubePositions[0]);
+	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition() - glm::vec3(-0.5f , 0.4f ,0.0f));
+
+	glm::vec3 lightColor;
+	lightColor.x = sin(glfwGetTime() * 2.0f);
+	lightColor.y = sin(glfwGetTime() * 0.7f);
+	lightColor.z = sin(glfwGetTime() * 1.3f);
+	glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // decrease the influence
+	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
+	m_shader->setVec3("light.ambient", ambientColor);
+	m_shader->setVec3("light.diffuse", diffuseColor);
+	m_shader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+	m_shader->setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+	m_shader->setVec3("material.diffuse", 1.0f, 0.5f, .031f);
+	m_shader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+	m_shader->setFloat("material.shineiness", 64.0f);
+
+
 	//
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

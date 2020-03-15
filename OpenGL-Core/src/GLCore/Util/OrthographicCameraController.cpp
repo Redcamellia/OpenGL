@@ -15,39 +15,34 @@ namespace GLCore::Utils {
 	{
 		if (Input::IsKeyPressed(HZ_KEY_A))
 		{
-			
-			m_CameraPosition.x += glm::dot(m_Camera.GetCameraFront(), glm::vec3(0.0f, 1.0f, 0.0f));
-			/*
-			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
-			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;*/
+			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
+			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_D))
 		{
-			m_CameraPosition.x -= glm::dot(m_Camera.GetCameraFront(), glm::vec3(0.0f, 1.0f, 0.0f));
-
-			//m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed  * ts;
-			//m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed  * ts;
+			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
+			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
 		}
 
 		if (Input::IsKeyPressed(HZ_KEY_W))
 		{
-			m_CameraPosition += m_Camera.GetCameraFront() * (m_CameraTranslationSpeed*10 * ts);
+			m_CameraPosition.z -= 30.0f * ts;
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_S))
 		{
-			m_CameraPosition -= m_Camera.GetCameraFront() * (m_CameraTranslationSpeed*10 * ts);
+			m_CameraPosition.z += 30.0f * ts;
 
 		}
 		if (Input::IsKeyPressed(HZ_KEY_SPACE))
 		{
-			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
-			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
+			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
 
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_C))
 		{
-			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
-			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed  * ts;
+			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
+			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * 6 * ts;
 		}
 
 		if (m_Rotation)
