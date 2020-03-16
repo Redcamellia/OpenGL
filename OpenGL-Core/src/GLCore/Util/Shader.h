@@ -17,6 +17,8 @@ namespace GLCore::Utils {
 
 
 
+		unsigned int loadTexture(char const* path);
+
 		void setBool(const std::string& name, bool value) const
 		{
 			glUniform1i(glGetUniformLocation(m_RendererID, name.c_str()), (int)value);

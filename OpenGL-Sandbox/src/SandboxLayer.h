@@ -19,12 +19,11 @@ private:
 	glm::vec4 m_SquareBaseColor = { 1.0f, 0.3f, 0.2f, 1.0f };
 	glm::vec4 m_SquareAlternateColor = { 0.2f, 0.3f, 0.8f, 1.0f };
 	glm::vec4 m_SquareColor = m_SquareBaseColor;
-
+	std::vector<unsigned int > m_textures;
 	GLCore::Utils::Shader * m_shader;
 	GLCore::Utils::Shader* m_light_shader;
 	GLuint VAO; // vertex array object
 	GLuint VBO; // vertex buffer object
 	GLuint EBO; // element buffer object
 	GLuint lightVAO;
-	float timeTracker = 0;
 };
