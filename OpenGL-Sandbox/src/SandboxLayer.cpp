@@ -5,18 +5,24 @@
 using namespace GLCore;
 using namespace GLCore::Utils;
 
-double xpos;
-double ypos;
 
-void mouse_callback(GLFWwindow* window, double x, double y )
+namespace cameraGlobal {
+	float lastX = 0;
+	float lastY = 0;
+	bool firstMouse = true;
+	float xoffset = 0;
+	float yoffset = 0;
+}
+using namespace cameraGlobal;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	xpos = x;
-	ypos = y;
+	xoffset = xpos;
+	yoffset = ypos;
+
 }
 
-
 SandboxLayer::SandboxLayer()
-: m_CameraController(16.0f / 9.0f)
+	: m_CameraController(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f)
 {
 	
 }
@@ -28,13 +34,14 @@ SandboxLayer::~SandboxLayer()
 void SandboxLayer::OnAttach()
 {
 	EnableGLDebugging();
+
 	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert", "assets/shaders/frag.frag");
 	m_light_shader = Shader::FromGLSLTextFiles("assets/shaders/lightVertex.vert", "assets/shaders/lightFragment.frag");
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
+	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), mouse_callback);
 	float vertices[] = {
 		// positions          // normals           // texture coords
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
@@ -81,11 +88,6 @@ void SandboxLayer::OnAttach()
 	};
 	m_textures.push_back(m_shader->loadTexture("assets/textures/container2.png"));
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-
-	glfwSetCursorPosCallback((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
-		,mouse_callback);
-
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	
@@ -113,21 +115,9 @@ void SandboxLayer::OnDetach()
 
 void SandboxLayer::OnEvent(Event& event)
 {
-	m_CameraController.OnEvent(event); // chains of responsibility
+	//m_CameraController.OnEvent(event); // chains of responsibility
 
 	EventDispatcher dispatcher(event);
-	dispatcher.Dispatch<MouseButtonPressedEvent>(
-		[&](MouseButtonPressedEvent& e)
-		{
-			m_SquareColor = m_SquareAlternateColor;
-			return false;
-		});
-	dispatcher.Dispatch<MouseButtonReleasedEvent>(
-		[&](MouseButtonReleasedEvent& e)
-		{
-			m_SquareColor = m_SquareBaseColor;
-			return false;
-		});
 	
 
 }
@@ -135,14 +125,10 @@ void SandboxLayer::OnEvent(Event& event)
 void SandboxLayer::OnUpdate(Timestep ts)
 {
 	glUseProgram(m_shader->GetRendererID());
-	if (glfwGetKey(static_cast<GLFWwindow*>(GLCore::Application::Get().GetWindow().GetNativeWindow())
-		, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		exit(0);
 	
 	m_CameraController.OnUpdate(ts);
+	m_CameraController.MouseProcess(cameraGlobal::xoffset, cameraGlobal::yoffset);
 	glm::mat4 model = glm::mat4(1.0f);
-	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(xpos / 100)), glm::vec3(0.0f, 1.0f, 0.0f)));
-	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(ypos / 100)), glm::vec3(1.0f, 0.0f, 0.0f)));
 
 	m_shader->setMat4("model", model);
 	m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
