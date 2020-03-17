@@ -80,7 +80,6 @@ void SandboxLayer::OnAttach()
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 	};
 	m_textures.push_back(m_shader->loadTexture("assets/textures/container2.png"));
-	m_textures.push_back(m_light_shader->loadTexture("assets/textures/container2.png"));
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 
@@ -114,7 +113,7 @@ void SandboxLayer::OnDetach()
 
 void SandboxLayer::OnEvent(Event& event)
 {
-	m_CameraController.OnEvent(event);
+	m_CameraController.OnEvent(event); // chains of responsibility
 
 	EventDispatcher dispatcher(event);
 	dispatcher.Dispatch<MouseButtonPressedEvent>(
@@ -141,20 +140,11 @@ void SandboxLayer::OnUpdate(Timestep ts)
 		exit(0);
 	
 	m_CameraController.OnUpdate(ts);
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()), 0.0f));
-	trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, 0.0f));
-	trans = glm::rotate(trans, ((float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
-
 	glm::mat4 model = glm::mat4(1.0f);
-	m_shader->setMat4("model", model);
-
-
-
 	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(xpos / 100)), glm::vec3(0.0f, 1.0f, 0.0f)));
 	m_CameraController.GetCamera().setViewMatrix(glm::rotate(m_CameraController.GetCamera().GetViewMatrix(), glm::radians(static_cast<float>(ypos / 100)), glm::vec3(1.0f, 0.0f, 0.0f)));
 
-
+	m_shader->setMat4("model", model);
 	m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
 	glm::mat4 tabdil = m_CameraController.GetCamera().GetViewMatrix();
 	m_shader->setMat4("view", tabdil);
@@ -163,15 +153,11 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glClearColor(0.621f, 0.648f, 0.628f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//m_shader->setVec3("ourColor", glm::vec3{ 1.0f, 0.3f, 0.2f });
-	//m_shader->setVec3("lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
-	trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, glm::vec3(6.5f, -5.75f, 19.0f));
 	glm::vec3 cubePositions[] = {
-	glm::vec3(2.0f, -1.5f, -7.0f)
+	glm::vec3(1.2f, 1.0f, 2.0f)
 	};
 	m_shader->setVec3("light.position", cubePositions[0]);
-	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition() - glm::vec3(-0.5f , 0.4f ,0.0f));
+	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition() /*- glm::vec3(-0.5f , 0.4f ,0.0f)*/);
 
 
 	m_shader->setVec3("light.ambient", 0.2f , 0.2f , 0.2f);
@@ -179,7 +165,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 	m_shader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
 	m_shader->setFloat("material.shineiness", 32.0f);
-
+	m_shader->setInt("material.diffuse", 0);
+	
 
 	//
 	glEnable(GL_DEPTH_TEST);
@@ -200,15 +187,14 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, -cubePositions[0]);
+	model = glm::translate(model, cubePositions[0]);
+	model = glm::scale(model, glm::vec3(0.2f));
 
-	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
 	glUseProgram(m_light_shader->GetRendererID());
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glBindVertexArray(lightVAO);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+
 
 	m_light_shader->setMat4("model", model);
 	m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());

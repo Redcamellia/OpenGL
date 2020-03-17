@@ -12,7 +12,7 @@ namespace GLCore::Utils {
 			, m_camera_front + m_Position
 			, glm::vec3(0.0f, 1.0f, 0.0f))),
 		
-		m_ProjectionMatrix(glm::perspective(glm::radians(40.0f) , (float)(1600/1400) , 0.1f , 1000.0f))
+		m_ProjectionMatrix(glm::perspective(glm::radians(40.0f) , (float)(1600/1200) , 0.1f , 100.0f))
 	{
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}

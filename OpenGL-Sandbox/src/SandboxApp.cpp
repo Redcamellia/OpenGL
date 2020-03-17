@@ -6,7 +6,7 @@ using namespace GLCore;
 class Sandbox : public Application
 {
 public:
-	Sandbox() : Application("my rectangle")
+	Sandbox() : Application("my rectangle" , 800 , 600)
 	{
 		PushLayer(new SandboxLayer());
 	}
