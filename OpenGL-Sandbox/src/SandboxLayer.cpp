@@ -153,13 +153,15 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 
 	m_shader->setVec3("light.position", glm::vec3(0 , 0 , 0));
-	m_shader->setVec3("light.direction", glm::vec3(0.2f, 1.0f, 0.3f));
 	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition());
 
 
-	m_shader->setVec3("light.ambient", 0.2f , 0.2f , 0.2f);
-	m_shader->setVec3("light.diffuse", 0.5f , 0.5f , 0.5f);
+	m_shader->setVec3("light.ambient", 0.1f , 0.1f , 0.1f);
+	m_shader->setVec3("light.diffuse", 0.7f , 0.7f , 0.7f);
 	m_shader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+	m_shader->setFloat("light.constant", 1.0f);
+	m_shader->setFloat("light.linear", 0.09f);
+	m_shader->setFloat("light.quadratic", 0.012f);
 	m_shader->setFloat("material.shineiness", 32.0f);
 	m_shader->setInt("m_diffuse", 0);
 	m_shader->setInt("m_specular", 1);
@@ -193,7 +195,6 @@ void SandboxLayer::OnUpdate(Timestep ts)
 		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 		m_shader->setMat4("model", model);
 		m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
-
 		m_shader->setMat4("view", tabdil);
 
 		glBindVertexArray(VAO);
@@ -201,24 +202,21 @@ void SandboxLayer::OnUpdate(Timestep ts)
 		model = glm::mat4(1.0f);
 	}
 
+	model = glm::mat4(1.0f);
+	model = glm::scale(model, glm::vec3(0.2f));
 
-	//lamp should be turned off in this section of tutorial
-
-	//model = glm::mat4(1.0f);
-	//model = glm::scale(model, glm::vec3(0.2f));
-
-	//glUseProgram(m_light_shader->GetRendererID());
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	//glBindVertexArray(lightVAO);
-	//glEnableVertexAttribArray(0);
+	glUseProgram(m_light_shader->GetRendererID());
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glBindVertexArray(lightVAO);
+	glEnableVertexAttribArray(0);
 
 
-	//m_light_shader->setMat4("model", model);
-	//m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
-	//m_light_shader->setMat4("view", tabdil);
-	//
+	m_light_shader->setMat4("model", model);
+	m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
+	m_light_shader->setMat4("view", tabdil);
+	
 
-	//glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 }
