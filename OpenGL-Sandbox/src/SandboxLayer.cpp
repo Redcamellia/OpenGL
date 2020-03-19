@@ -127,25 +127,34 @@ void SandboxLayer::OnEvent(Event& event)
 void SandboxLayer::OnUpdate(Timestep ts)
 {
 	glUseProgram(m_shader->GetRendererID());
+
+	glm::vec3 cubePositions[] = {
+		  glm::vec3(3.0f,  9.0f,  2.0f),
+		  glm::vec3(2.0f,  5.0f, -15.0f),
+		  glm::vec3(-1.5f, -2.2f, -2.5f),
+		  glm::vec3(-3.8f, -2.0f, -12.3f),
+		  glm::vec3(2.4f, -0.4f, -3.5f),
+		  glm::vec3(-1.7f,  3.0f, -7.5f),
+		  glm::vec3(1.3f, -2.0f, -2.5f),
+		  glm::vec3(1.5f,  2.0f, -2.5f),
+		  glm::vec3(1.5f,  0.2f, -1.5f),
+		  glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 	
 	m_CameraController.OnUpdate(ts);
 	m_CameraController.MouseProcess(cameraGlobal::xoffset, cameraGlobal::yoffset);
 	glm::mat4 model = glm::mat4(1.0f);
-
-	m_shader->setMat4("model", model);
-	m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
-	glm::mat4 tabdil = m_CameraController.GetCamera().GetViewMatrix();
-	m_shader->setMat4("view", tabdil);
+	//model = glm::translate(model, cubePositions[0]);
 
 
-	glClearColor(0.621f, 0.648f, 0.628f, 1.0f);
+
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm::vec3 cubePositions[] = {
-	glm::vec3(1.2f, 1.0f, 2.0f)
-	};
-	m_shader->setVec3("light.position", cubePositions[0]);
-	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition() /*- glm::vec3(-0.5f , 0.4f ,0.0f)*/);
+
+	m_shader->setVec3("light.position", glm::vec3(0 , 0 , 0));
+	m_shader->setVec3("light.direction", glm::vec3(0.2f, 1.0f, 0.3f));
+	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition());
 
 
 	m_shader->setVec3("light.ambient", 0.2f , 0.2f , 0.2f);
@@ -168,34 +177,48 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_textures[2]);
-
-
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, cubePositions[0]);
-	model = glm::scale(model, glm::vec3(0.2f));
-
-	glUseProgram(m_light_shader->GetRendererID());
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glBindVertexArray(lightVAO);
-	glEnableVertexAttribArray(0);
-
-
-	m_light_shader->setMat4("model", model);
-	m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
-	m_light_shader->setMat4("view", tabdil);
+	glm::mat4 tabdil = m_CameraController.GetCamera().GetViewMatrix();
 	
+	for (int i = 0; i < 10; i++)
+	{
+		model = glm::translate(model, cubePositions[i]);
+		float angle = 20.0f * i;
+		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		m_shader->setMat4("model", model);
+		m_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
 
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+		m_shader->setMat4("view", tabdil);
+
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		model = glm::mat4(1.0f);
+	}
+
+
+	//lamp should be turned off in this section of tutorial
+
+	//model = glm::mat4(1.0f);
+	//model = glm::scale(model, glm::vec3(0.2f));
+
+	//glUseProgram(m_light_shader->GetRendererID());
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	//glBindVertexArray(lightVAO);
+	//glEnableVertexAttribArray(0);
+
+
+	//m_light_shader->setMat4("model", model);
+	//m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
+	//m_light_shader->setMat4("view", tabdil);
+	//
+
+	//glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 }

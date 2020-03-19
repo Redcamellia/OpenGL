@@ -30,8 +30,6 @@ namespace GLCore::Utils {
 			Position += Up * velocity;
 		if (direction == DOWN)
 			Position -= Up * velocity;
-
-		std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
 	}
 
 	void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch)
