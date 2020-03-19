@@ -11,7 +11,9 @@ namespace GLCore::Utils {
 		FORWARD,
 		BACKWARD,
 		LEFT,
-		RIGHT
+		RIGHT,
+		UPWARD,
+		DOWN
 	};
 
 	// An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -37,7 +39,7 @@ namespace GLCore::Utils {
 			return Position;
 		}
 		// Constructor with vectors
-		Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 50.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, -1.0f))
+		Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 20.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, -1.0f))
 		{
 			Position = position;
 			WorldUp = up;

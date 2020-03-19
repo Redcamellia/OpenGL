@@ -46,6 +46,10 @@ namespace GLCore::Utils
 				m_Camera.ProcessKeyboard(LEFT, ts);
 			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 				m_Camera.ProcessKeyboard(RIGHT, ts);
+			if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+				m_Camera.ProcessKeyboard(UPWARD, ts);
+			if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+				m_Camera.ProcessKeyboard(DOWN, ts);
 
 		}
 		

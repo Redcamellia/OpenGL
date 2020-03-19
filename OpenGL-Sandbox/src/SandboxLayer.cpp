@@ -22,7 +22,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 SandboxLayer::SandboxLayer()
-	: m_CameraController(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f)
+	: m_CameraController(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f)
 {
 	
 }
@@ -87,6 +87,8 @@ void SandboxLayer::OnAttach()
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 	};
 	m_textures.push_back(m_shader->loadTexture("assets/textures/container2.png"));
+	m_textures.push_back(m_shader->loadTexture("assets/textures/container2_specular.png"));
+	m_textures.push_back(m_shader->loadTexture("assets/textures/matrix.jpg"));
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -149,9 +151,9 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setVec3("light.ambient", 0.2f , 0.2f , 0.2f);
 	m_shader->setVec3("light.diffuse", 0.5f , 0.5f , 0.5f);
 	m_shader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-	m_shader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
 	m_shader->setFloat("material.shineiness", 32.0f);
-	m_shader->setInt("material.diffuse", 0);
+	m_shader->setInt("m_diffuse", 0);
+	m_shader->setInt("m_specular", 1);
 	
 
 	//
@@ -164,12 +166,16 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
+
+
+
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	
-
 
 
 	model = glm::mat4(1.0f);

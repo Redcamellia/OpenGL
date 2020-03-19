@@ -26,6 +26,10 @@ namespace GLCore::Utils {
 			Position -= Right * velocity;
 		if (direction == RIGHT)
 			Position += Right * velocity;
+		if (direction == UPWARD)
+			Position += Up * velocity;
+		if (direction == DOWN)
+			Position -= Up * velocity;
 
 		std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
 	}
