@@ -6,7 +6,7 @@ struct Material {
 
 uniform sampler2D m_diffuse ;
 uniform sampler2D m_specular ;
-
+uniform sampler2D matrix_sampler ;
 struct Light {
     vec3 ambient ;
     vec3 diffuse ;
@@ -41,8 +41,8 @@ void main(void)
     vec3 specular = spec * light.specular * texture(m_specular , texCoords).rgb;
 
 
-
-    vec3 result = ambient+diffuse+specular ;
+    float matrix_color = dot(texture(matrix_sampler , texCoords).rgb , vec3(0.0f , 1.0f , 0.0f));
+    vec3 result = vec3(0.0f , matrix_color , 0.0f)+ambient+diffuse+specular ;
     color = vec4(result , 1.0f);
 
 }

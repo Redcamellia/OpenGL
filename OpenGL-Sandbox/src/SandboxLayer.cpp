@@ -154,6 +154,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setFloat("material.shineiness", 32.0f);
 	m_shader->setInt("m_diffuse", 0);
 	m_shader->setInt("m_specular", 1);
+	m_shader->setInt("matrix_sampler", 2);
 	
 
 	//
@@ -171,7 +172,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
-
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_textures[2]);
 
 
 	glBindVertexArray(VAO);
