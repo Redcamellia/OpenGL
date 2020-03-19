@@ -152,9 +152,9 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	m_shader->setVec3("light.position", glm::vec3(0 , 0 , 0));
+	m_shader->setVec3("light.position", m_CameraController.GetCamera().GetPosition());
 	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition());
-
+	m_shader->setVec3("light.direction", m_CameraController.GetCamera().getCameraFront());
 
 	m_shader->setVec3("light.ambient", 0.1f , 0.1f , 0.1f);
 	m_shader->setVec3("light.diffuse", 0.7f , 0.7f , 0.7f);
@@ -162,6 +162,9 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setFloat("light.constant", 1.0f);
 	m_shader->setFloat("light.linear", 0.09f);
 	m_shader->setFloat("light.quadratic", 0.012f);
+	m_shader->setFloat("light.cutOff", glm::cos(glm::radians(7.5f)));
+
+
 	m_shader->setFloat("material.shineiness", 32.0f);
 	m_shader->setInt("m_diffuse", 0);
 	m_shader->setInt("m_specular", 1);

@@ -12,7 +12,9 @@ struct Light {
     vec3 diffuse ;
     vec3 specular ;
     vec3 position ;
+    vec3 direction ;
 
+    float cutOff ;
     float constant ;
     float linear ;
     float quadratic ;
@@ -27,16 +29,18 @@ in vec2 texCoords ;
 uniform vec3 camera_pos ;
 void main(void)
 {
+    vec3 norm = normalize(normal);
+    vec3 lightDir = normalize(light.position-FragPos );
+
+    if(dot(lightDir ,normalize(-light.direction)) > light.cutOff)
+    {
     // ambient
     vec3 ambient =  light.ambient * vec3(texture(m_diffuse , texCoords)).rgb ;
 
     // diffuse
-    vec3 norm = normalize(normal);
-    vec3 lightDir = normalize(light.position-FragPos );
+
     float diff = max(dot(norm , lightDir),0.0f) ;
     vec3 diffuse  = diff * texture(m_diffuse , texCoords).rgb * light.diffuse;
-
-
 
     float distance = length(FragPos - light.position);
     float attenuation = 1.0 / (light.constant +
@@ -50,7 +54,6 @@ void main(void)
     float spec = pow(max(zarb, 0.0f ), material.shineiness );
     vec3 specular = spec * light.specular * texture(m_specular , texCoords).rgb;
 
-    ambient *= attenuation ;
     diffuse *= attenuation ;
     specular *= attenuation ;
 
@@ -58,5 +61,10 @@ void main(void)
 
     vec3 result =ambient+diffuse+specular ;
     color = vec4(result , 1.0f);
+    }
+    else
+    {
+        color = vec4(light.ambient * texture(m_diffuse , texCoords).rgb , 1.0);
+    }
 
 }
