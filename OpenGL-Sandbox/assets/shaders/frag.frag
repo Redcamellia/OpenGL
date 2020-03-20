@@ -1,4 +1,4 @@
-#version 430 core
+#version 410 core
 struct Material {
 
     float shineiness;
@@ -15,6 +15,7 @@ struct Light {
     vec3 direction ;
 
     float cutOff ;
+    float outerCutOff ;
     float constant ;
     float linear ;
     float quadratic ;
@@ -32,8 +33,12 @@ void main(void)
     vec3 norm = normalize(normal);
     vec3 lightDir = normalize(light.position-FragPos );
 
-    if(dot(lightDir ,normalize(-light.direction)) > light.cutOff)
+    float theta = dot(lightDir ,normalize(-light.direction));
+    if(theta > light.outerCutOff)
     {
+    float epsilon = light.cutOff - light.outerCutOff ;
+    float intensity = clamp((theta - light.outerCutOff)/epsilon , 0.0f , 1.0f);
+
     // ambient
     vec3 ambient =  light.ambient * vec3(texture(m_diffuse , texCoords)).rgb ;
 
@@ -56,6 +61,8 @@ void main(void)
 
     diffuse *= attenuation ;
     specular *= attenuation ;
+    diffuse *= intensity ;
+    specular *= intensity ;
 
 
 

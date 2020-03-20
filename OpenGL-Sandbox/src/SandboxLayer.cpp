@@ -162,7 +162,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setFloat("light.constant", 1.0f);
 	m_shader->setFloat("light.linear", 0.09f);
 	m_shader->setFloat("light.quadratic", 0.012f);
-	m_shader->setFloat("light.cutOff", glm::cos(glm::radians(7.5f)));
+	m_shader->setFloat("light.cutOff", glm::cos(glm::radians(10.0f)));
+	m_shader->setFloat("light.outerCutOff", glm::cos(glm::radians(12.5f)));
 
 
 	m_shader->setFloat("material.shineiness", 32.0f);
