@@ -152,7 +152,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_shader->setVec3("viewPos", m_CameraController.GetCamera().GetPosition());
@@ -161,37 +161,37 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setFloat("material.shininess", 32.0f);
 
 	m_shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-	m_shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-	m_shader->setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	m_shader->setVec3("dirLight.ambient", 0.0f, 0.0f, 0.0f);
+	m_shader->setVec3("dirLight.diffuse", 0.05f, 0.05f, 0.05f);
 	m_shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 	
 	m_shader->setVec3("pointLights[0].position", pointLightPositions[0]);
-	m_shader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-	m_shader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[0].ambient", 0.0f, 0.0f, 0.0f);
+	m_shader->setVec3("pointLights[0].diffuse", 0.2f, 0.2f, 0.2f);
 	m_shader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
 	m_shader->setFloat("pointLights[0].constant", 1.0f);
 	m_shader->setFloat("pointLights[0].linear", 0.09);
 	m_shader->setFloat("pointLights[0].quadratic", 0.032);
 	
 	m_shader->setVec3("pointLights[1].position", pointLightPositions[1]);
-	m_shader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-	m_shader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[1].ambient", 0.00f, 0.00f, 0.00f);
+	m_shader->setVec3("pointLights[1].diffuse", 0.2f, 0.2f, 0.2f);
 	m_shader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
 	m_shader->setFloat("pointLights[1].constant", 1.0f);
 	m_shader->setFloat("pointLights[1].linear", 0.09);
 	m_shader->setFloat("pointLights[1].quadratic", 0.032);
 	
 	m_shader->setVec3("pointLights[2].position", pointLightPositions[2]);
-	m_shader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-	m_shader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[2].ambient", 0.00f, 0.00f, 0.00f);
+	m_shader->setVec3("pointLights[2].diffuse", 0.2f, 0.2f, 0.2f);
 	m_shader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
 	m_shader->setFloat("pointLights[2].constant", 1.0f);
 	m_shader->setFloat("pointLights[2].linear", 0.09);
 	m_shader->setFloat("pointLights[2].quadratic", 0.032);
 	
 	m_shader->setVec3("pointLights[3].position", pointLightPositions[3]);
-	m_shader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-	m_shader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[3].ambient", 0.00f, 0.00f, 0.00f);
+	m_shader->setVec3("pointLights[3].diffuse", 0.2f, 0.2f, 0.2f);
 	m_shader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
 	m_shader->setFloat("pointLights[3].constant", 1.0f);
 	m_shader->setFloat("pointLights[3].linear", 0.09);
@@ -203,10 +203,10 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
 	m_shader->setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
 	m_shader->setFloat("spotLight.constant", 1.0f);
-	m_shader->setFloat("spotLight.linear", 0.09);
-	m_shader->setFloat("spotLight.quadratic", 0.032);
-	m_shader->setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-	m_shader->setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+	m_shader->setFloat("spotLight.linear", 0.016);
+	m_shader->setFloat("spotLight.quadratic", 0.09);
+	m_shader->setFloat("spotLight.cutOff", glm::cos(glm::radians(7.5f)));
+	m_shader->setFloat("spotLight.outerCutOff", glm::cos(glm::radians(9.0f)));
 
 
 
