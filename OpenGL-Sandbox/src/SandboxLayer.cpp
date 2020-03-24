@@ -88,7 +88,6 @@ void SandboxLayer::OnAttach()
 	};
 	m_textures.push_back(m_shader->loadTexture("assets/textures/container2.png"));
 	m_textures.push_back(m_shader->loadTexture("assets/textures/container2_specular.png"));
-	m_textures.push_back(m_shader->loadTexture("assets/textures/matrix.jpg"));
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -146,31 +145,70 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glm::mat4 model = glm::mat4(1.0f);
 	//model = glm::translate(model, cubePositions[0]);
 
-
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
+	};
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	m_shader->setVec3("viewPos", m_CameraController.GetCamera().GetPosition());
+	m_shader->setInt("material.diffuse", 0);
+	m_shader->setInt("material.specular", 1);
+	m_shader->setFloat("material.shininess", 32.0f);
 
-	m_shader->setVec3("light.position", m_CameraController.GetCamera().GetPosition());
-	m_shader->setVec3("camera_pos", m_CameraController.GetCamera().GetPosition());
-	m_shader->setVec3("light.direction", m_CameraController.GetCamera().getCameraFront());
-
-	m_shader->setVec3("light.ambient", 0.1f , 0.1f , 0.1f);
-	m_shader->setVec3("light.diffuse", 0.7f , 0.7f , 0.7f);
-	m_shader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-	m_shader->setFloat("light.constant", 1.0f);
-	m_shader->setFloat("light.linear", 0.09f);
-	m_shader->setFloat("light.quadratic", 0.012f);
-	m_shader->setFloat("light.cutOff", glm::cos(glm::radians(10.0f)));
-	m_shader->setFloat("light.outerCutOff", glm::cos(glm::radians(12.5f)));
-
-
-	m_shader->setFloat("material.shineiness", 32.0f);
-	m_shader->setInt("m_diffuse", 0);
-	m_shader->setInt("m_specular", 1);
-	m_shader->setInt("matrix_sampler", 2);
+	m_shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+	m_shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+	m_shader->setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	m_shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 	
+	m_shader->setVec3("pointLights[0].position", pointLightPositions[0]);
+	m_shader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+	m_shader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+	m_shader->setFloat("pointLights[0].constant", 1.0f);
+	m_shader->setFloat("pointLights[0].linear", 0.09);
+	m_shader->setFloat("pointLights[0].quadratic", 0.032);
+	
+	m_shader->setVec3("pointLights[1].position", pointLightPositions[1]);
+	m_shader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+	m_shader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+	m_shader->setFloat("pointLights[1].constant", 1.0f);
+	m_shader->setFloat("pointLights[1].linear", 0.09);
+	m_shader->setFloat("pointLights[1].quadratic", 0.032);
+	
+	m_shader->setVec3("pointLights[2].position", pointLightPositions[2]);
+	m_shader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+	m_shader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+	m_shader->setFloat("pointLights[2].constant", 1.0f);
+	m_shader->setFloat("pointLights[2].linear", 0.09);
+	m_shader->setFloat("pointLights[2].quadratic", 0.032);
+	
+	m_shader->setVec3("pointLights[3].position", pointLightPositions[3]);
+	m_shader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+	m_shader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+	m_shader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+	m_shader->setFloat("pointLights[3].constant", 1.0f);
+	m_shader->setFloat("pointLights[3].linear", 0.09);
+	m_shader->setFloat("pointLights[3].quadratic", 0.032);
+
+	m_shader->setVec3("spotLight.position", m_CameraController.GetCamera().GetPosition());
+	m_shader->setVec3("spotLight.direction", m_CameraController.GetCamera().getCameraFront());
+	m_shader->setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+	m_shader->setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+	m_shader->setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+	m_shader->setFloat("spotLight.constant", 1.0f);
+	m_shader->setFloat("spotLight.linear", 0.09);
+	m_shader->setFloat("spotLight.quadratic", 0.032);
+	m_shader->setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+	m_shader->setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
+
 
 	//
 	glEnable(GL_DEPTH_TEST);
@@ -188,8 +226,6 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_textures[2]);
 	glm::mat4 tabdil = m_CameraController.GetCamera().GetViewMatrix();
 	
 	for (int i = 0; i < 10; i++)
@@ -206,21 +242,29 @@ void SandboxLayer::OnUpdate(Timestep ts)
 		model = glm::mat4(1.0f);
 	}
 
-	model = glm::mat4(1.0f);
-	model = glm::scale(model, glm::vec3(0.2f));
-
-	glUseProgram(m_light_shader->GetRendererID());
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glBindVertexArray(lightVAO);
-	glEnableVertexAttribArray(0);
 
 
-	m_light_shader->setMat4("model", model);
-	m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
-	m_light_shader->setMat4("view", tabdil);
-	
 
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	for (int i = 0; i < 4; i++)
+	{
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, pointLightPositions[i]);
+		model = glm::scale(model, glm::vec3(0.2f));
+
+		glUseProgram(m_light_shader->GetRendererID());
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glBindVertexArray(lightVAO);
+		glEnableVertexAttribArray(0);
+
+
+		m_light_shader->setMat4("model", model);
+		m_light_shader->setMat4("projection", m_CameraController.GetCamera().GetProjectionMatrix());
+		m_light_shader->setMat4("view", tabdil);
+
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+
 
 
 }
