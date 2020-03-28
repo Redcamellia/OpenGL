@@ -34,9 +34,10 @@ public :
 		std::vector<unsigned int> arg_indices,
 		std::vector<Texture> arg_textures);
 	void draw(GLCore::Utils::Shader arg_shader);
+	GLuint VAO;
 
 private :
-	GLuint VAO, VBO, EBO;
+	GLuint  VBO, EBO;
 	void setupMesh();
 
 };

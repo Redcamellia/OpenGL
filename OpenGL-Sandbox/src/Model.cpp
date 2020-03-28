@@ -2,16 +2,20 @@
 
 void Model::draw(GLCore::Utils::Shader arg_shader)
 {
+	glUseProgram(arg_shader.GetRendererID());
 	for (int i = 0; i < meshes.size(); i++)
 	{
 		meshes[i].draw(arg_shader);
 	}
+
 }
 
 unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma = false)
 {
 	std::string filename = std::string(path);
 	filename = directory + '/' + filename;
+
+	std::cout << filename << std::endl;
 
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -41,7 +45,6 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 	}
 	else
 	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
 		stbi_image_free(data);
 	}
 
@@ -71,10 +74,13 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 		meshes.push_back(processMesh(mesh, scene));
 	}
 
+	
+
 	for (int i = 0; i < node->mNumChildren; i++)
 	{
 		processNode(node->mChildren[i], scene);
 	}
+
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
@@ -111,15 +117,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		else
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
-		vector.x = mesh->mTangents[i].x;
-		vector.y = mesh->mTangents[i].y;
-		vector.z = mesh->mTangents[i].z;
+		//vector.x = mesh->mTangents[i].x;
+		//vector.y = mesh->mTangents[i].y;
+		//vector.z = mesh->mTangents[i].z;
 
 		vertex.Tangent = vector;
 		
-		vector.x = mesh->mBitangents[i].x;
-		vector.y = mesh->mBitangents[i].y;
-		vector.z = mesh->mBitangents[i].z;
+		//vector.x = mesh->mBitangents[i].x;
+		//vector.y = mesh->mBitangents[i].y;
+		//vector.z = mesh->mBitangents[i].z;
 
 		vertex.Bitangent = vector;
 
