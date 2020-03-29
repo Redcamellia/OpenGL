@@ -24,6 +24,7 @@ private:
 	GLuint EBO; // element buffer object
 	GLuint lightVAO;
 	GLuint planeVAO, planeVBO;
+	GLuint grassVAO, grassVBO;
 
 
 private :

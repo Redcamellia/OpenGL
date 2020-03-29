@@ -11,6 +11,8 @@ unsigned int loadTexture(char const* path)
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
+	std::cout << "loading texture from : " << path << std::endl;
+
 	int width, height, nrComponents;
 	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
 	if (data)
@@ -102,18 +104,43 @@ void SandboxLayer::OnAttach()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glBindVertexArray(0);
 
+	float grassPositions[] =
+	{
+		 0.5f , 0.5f  , 0.0f , 1.0f , 1.0f ,
+		-0.5f , -0.5f , 0.0f , 0.0f , 0.0f ,
+		 0.5f , -0.5f , 0.0f , 1.0f , 0.0f ,
+		 0.5f , 0.5f  , 0.0f , 1.0f , 1.0f ,
+		-0.5f , -0.5f , 0.0f , 0.0f , 0.0f ,
+		-0.5f , 0.5f  , 0.0f , 0.0f , 1.0f
+	};
+
+	glGenVertexArrays(1, &grassVAO);
+	glGenBuffers(1, &grassVBO);
+	glBindVertexArray(grassVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(grassPositions), &grassPositions, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
 	m_textures.push_back(loadTexture("assets/textures/marble.jpg"));
 	m_textures.push_back(loadTexture("assets/textures/metal.png"));
+	m_textures.push_back(loadTexture("assets/textures/blending_transparent_window.png"));
 
 	m_shader->setInt("texture1", 0);
 	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), mouse_callback);
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
 
 	// Init here
 }
@@ -136,15 +163,34 @@ void SandboxLayer::OnEvent(Event& event)
 void SandboxLayer::OnUpdate(Timestep ts)
 {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glUseProgram(m_shader->GetRendererID());
-	glEnable(GL_DEPTH_TEST);
 
-
-	glStencilMask(0x00);
+	std::vector<glm::vec3> vegetation;
+	vegetation.push_back(glm::vec3(-1.6f, 0.0f, -0.28f));
+	vegetation.push_back(glm::vec3(1.7f, 0.0f, 0.81f));
+	vegetation.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
+	vegetation.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
+	vegetation.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
 
 	glm::mat4 view = m_CameraController.GetCamera().GetViewMatrix();
 	glm::mat4 projection = m_CameraController.GetCamera().GetProjectionMatrix();
+	glm::mat4 model = glm::mat4(1.0f);
+
+	glBindVertexArray(grassVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_textures[2]);
+	
+	for (int i = 0; i < vegetation.size(); i++)
+	{
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, vegetation[i]);
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		m_shader->setMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
+
 
 	glBindVertexArray(planeVAO);
 	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
@@ -154,7 +200,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 	m_CameraController.OnUpdate(ts);
 	m_CameraController.MouseProcess(cameraGlobal::xoffset, cameraGlobal::yoffset);
-	glm::mat4 model = glm::mat4(1.0f);
+
 
 	m_shader->setMat4("view", view);
 
@@ -162,11 +208,12 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	// cubes
 
 
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glStencilMask(0xFF);
+
+
 	glBindVertexArray(VAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
+	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
 	m_shader->setMat4("model", model);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -178,32 +225,12 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 	
 
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilMask(0x00);
-	glDisable(GL_DEPTH_TEST);
-	glUseProgram(m_light_shader->GetRendererID());
-	m_light_shader->setMat4("projection", projection);
-	m_light_shader->setMat4("view", view);
-	float scale = 1.02;
-	// cubes
-	glBindVertexArray(VAO);
-	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-	model = glm::scale(model, glm::vec3(scale, scale, scale));
-	m_light_shader->setMat4("model", model);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(scale, scale, scale));
-	m_light_shader->setMat4("model", model);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
 
 
-	glStencilMask(0xFF);
-	glEnable(GL_DEPTH_TEST);
+
+
+
+
 
 
 
