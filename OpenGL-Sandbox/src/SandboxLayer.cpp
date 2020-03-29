@@ -41,9 +41,10 @@ void SandboxLayer::OnAttach()
 	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert", "assets/shaders/frag.frag");
 	glUseProgram(m_shader->GetRendererID());
 	ourModel = Model("assets/nanosuit/nanosuit.obj");
-	//anotherModel = Model("assets/textures/porsche 911 GT/Porsche_911_GT2.obj");
+	//audiModel = Model("assets/textures/porsche 911 GT/Porsche_911_GT2.obj");
 	anotherModel = Model("assets/textures/wall/wall.obj");
 	grass = Model("assets/textures/grass/grass1/10450_Rectangular_Grass_Patch_v1_iterations-2.obj");
+	audiModel = Model("assets/textures/3627_open3dmodel/NFSHP2 - Porsche Carrera GT/carrgt.obj");
 	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), mouse_callback);
 
 	
@@ -106,6 +107,15 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	drawWall(glm::vec3(-3.0f, -1.5f, -1.0f));
 	
 
+	m_shader->setMat4("view", view);
+	m_shader->setMat4("projection", projection);
+
+
+	model = glm::translate(model, glm::vec3(4.0f, 3.40f, 30.0f));
+	model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
+	model = glm::rotate(model, glm::radians(37.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	m_shader->setMat4("model", model);
+	audiModel.draw(*m_shader);
 
 
 	drawGrass(glm::vec3(0.0f, 0.0f, 0.0f));

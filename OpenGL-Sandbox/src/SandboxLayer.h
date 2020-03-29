@@ -26,6 +26,7 @@ private:
 	Model ourModel;
 	Model anotherModel;
 	Model grass;
+	Model audiModel;
 	void drawGrass(glm::vec3 position);
 	void drawWall(glm::vec3 position);
 };
