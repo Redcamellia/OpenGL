@@ -6,6 +6,43 @@
 using namespace GLCore;
 using namespace GLCore::Utils;
 
+unsigned int loadTexture(char const* path)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
+}
+
 
 namespace cameraGlobal {
 	float lastX = 0;
@@ -39,21 +76,44 @@ void SandboxLayer::OnAttach()
 	EnableGLDebugging();
 
 	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert", "assets/shaders/frag.frag");
+	m_light_shader = Shader::FromGLSLTextFiles("assets/shaders/lightVertex.vert", "assets/shaders/lightFragment.frag");
 	glUseProgram(m_shader->GetRendererID());
-	ourModel = Model("assets/nanosuit/nanosuit.obj");
-	//audiModel = Model("assets/textures/porsche 911 GT/Porsche_911_GT2.obj");
-	anotherModel = Model("assets/textures/wall/wall.obj");
-	grass = Model("assets/textures/grass/grass1/10450_Rectangular_Grass_Patch_v1_iterations-2.obj");
-	audiModel = Model("assets/textures/3627_open3dmodel/NFSHP2 - Porsche Carrera GT/carrgt.obj");
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glBindVertexArray(0);
+	// plane VAO
+
+	glGenVertexArrays(1, &planeVAO);
+	glGenBuffers(1, &planeVBO);
+	glBindVertexArray(planeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glBindVertexArray(0);
+
+	m_textures.push_back(loadTexture("assets/textures/marble.jpg"));
+	m_textures.push_back(loadTexture("assets/textures/metal.png"));
+
+	m_shader->setInt("texture1", 0);
 	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), mouse_callback);
-
-	
-
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	// Init here
 }
@@ -75,61 +135,78 @@ void SandboxLayer::OnEvent(Event& event)
 
 void SandboxLayer::OnUpdate(Timestep ts)
 {
-
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glUseProgram(m_shader->GetRendererID());
+	glEnable(GL_DEPTH_TEST);
+
+
+	glStencilMask(0x00);
+
+	glm::mat4 view = m_CameraController.GetCamera().GetViewMatrix();
+	glm::mat4 projection = m_CameraController.GetCamera().GetProjectionMatrix();
+
+	glBindVertexArray(planeVAO);
+	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
+	m_shader->setMat4("model", glm::mat4(1.0f));
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
 
 	m_CameraController.OnUpdate(ts);
 	m_CameraController.MouseProcess(cameraGlobal::xoffset, cameraGlobal::yoffset);
 	glm::mat4 model = glm::mat4(1.0f);
 
-	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glm::mat4 view = m_CameraController.GetCamera().GetViewMatrix();
-	glm::mat4 projection = m_CameraController.GetCamera().GetProjectionMatrix();
 	m_shader->setMat4("view", view);
+
 	m_shader->setMat4("projection", projection);
+	// cubes
+
+
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilMask(0xFF);
+	glBindVertexArray(VAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
+	model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+	m_shader->setMat4("model", model);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+	m_shader->setMat4("model", model);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// floor
 
 	
-	model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-	model = glm::scale(model, glm::vec3(0.09f, 0.09f, 0.09f));	// it's a bit too big for our scene, so scale it down
-	m_shader->setMat4("model", model);
 
-	ourModel.draw(*m_shader);
-
-	drawWall(glm::vec3(0.0f, 0.0f, -1.0f));
-	drawWall(glm::vec3(3.0f, 0.0f, -1.0f));
-	drawWall(glm::vec3(6.0f, 0.0f, -1.0f));
-	drawWall(glm::vec3(-3.0f, 0.0f, -1.0f));
-	drawWall(glm::vec3(0.0f, -1.5f, -1.0f));
-	drawWall(glm::vec3(3.0f, -1.5f, -1.0f));
-	drawWall(glm::vec3(6.0f, -1.5f, -1.0f));
-	drawWall(glm::vec3(-3.0f, -1.5f, -1.0f));
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilMask(0x00);
+	glDisable(GL_DEPTH_TEST);
+	glUseProgram(m_light_shader->GetRendererID());
+	m_light_shader->setMat4("projection", projection);
+	m_light_shader->setMat4("view", view);
+	float scale = 1.02;
+	// cubes
+	glBindVertexArray(VAO);
+	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+	model = glm::scale(model, glm::vec3(scale, scale, scale));
+	m_light_shader->setMat4("model", model);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	
-
-	m_shader->setMat4("view", view);
-	m_shader->setMat4("projection", projection);
-
-
-	model = glm::translate(model, glm::vec3(4.0f, 3.40f, 30.0f));
-	model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
-	model = glm::rotate(model, glm::radians(37.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	m_shader->setMat4("model", model);
-	audiModel.draw(*m_shader);
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(scale, scale, scale));
+	m_light_shader->setMat4("model", model);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
 
 
-	drawGrass(glm::vec3(0.0f, 0.0f, 0.0f));
-	drawGrass(glm::vec3(3.0f, 0.0f, 0.0f));
-	drawGrass(glm::vec3(-3.0f, 0.0f, 0.0f));
-	drawGrass(glm::vec3(6.0f, 0.0f, 0.0f));
-	drawGrass(glm::vec3(0.0f, 0.0f, 3.0f));
-	drawGrass(glm::vec3(3.0f, 0.0f, 3.0f));
-	drawGrass(glm::vec3(-3.0f, 0.0f, 3.0f));
-	drawGrass(glm::vec3(6.0f, 0.0f, 3.0f));
-	drawGrass(glm::vec3(0.0f, 0.0f, -3.0f));
-	drawGrass(glm::vec3(3.0f, 0.0f, -3.0f));
-	drawGrass(glm::vec3(-3.0f, 0.0f, -3.0f));
-	drawGrass(glm::vec3(6.0f, 0.0f, -3.0f));
+	glStencilMask(0xFF);
+	glEnable(GL_DEPTH_TEST);
+
+
+
 
 
 }
@@ -139,36 +216,3 @@ void SandboxLayer::OnImGuiRender()
 	// ImGui here
 }
 
-void SandboxLayer::drawGrass(glm::vec3 position)
-{
-	glm::mat4 view(1.0f);
-	glm::mat4 projection(1.0f);
-	glm::mat4 model(1.0f);
-
-	view = m_CameraController.GetCamera().GetViewMatrix();
-	projection = m_CameraController.GetCamera().GetProjectionMatrix();
-	m_shader->setMat4("view", view);
-	m_shader->setMat4("projection", projection);
-	model = glm::translate(model, position);
-	model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(0.01, 0.01, 0.01));
-	model = glm::translate(model, glm::vec3(0.0f, -0.5f, -179.75f));
-	m_shader->setMat4("model", model);
-	grass.draw(*m_shader);
-}
-
-void SandboxLayer::drawWall(glm::vec3 position)
-{
-	glm::mat4 view(1.0f);
-	glm::mat4 projection(1.0f);
-	glm::mat4 model(1.0f);
-
-	view = m_CameraController.GetCamera().GetViewMatrix();
-	projection = m_CameraController.GetCamera().GetProjectionMatrix();
-	m_shader->setMat4("view", view);
-	m_shader->setMat4("projection", projection);
-	model = glm::scale(model, glm::vec3(0.5f));
-	model = glm::translate(model, position);
-	m_shader->setMat4("model", model);
-	anotherModel.draw(*m_shader);
-}
