@@ -110,8 +110,8 @@ void SandboxLayer::OnAttach()
 		-0.5f , -0.5f , 0.0f , 0.0f , 0.0f ,
 		 0.5f , -0.5f , 0.0f , 1.0f , 0.0f ,
 		 0.5f , 0.5f  , 0.0f , 1.0f , 1.0f ,
-		-0.5f , -0.5f , 0.0f , 0.0f , 0.0f ,
-		-0.5f , 0.5f  , 0.0f , 0.0f , 1.0f
+		-0.5f , 0.5f  , 0.0f , 0.0f , 1.0f ,
+		-0.5f , -0.5f , 0.0f , 0.0f , 0.0f 
 	};
 
 	glGenVertexArrays(1, &grassVAO);
@@ -138,6 +138,9 @@ void SandboxLayer::OnAttach()
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glFrontFace(GL_CW);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
