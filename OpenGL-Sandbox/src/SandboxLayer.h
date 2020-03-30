@@ -25,9 +25,27 @@ private:
 	GLuint lightVAO;
 	GLuint planeVAO, planeVBO;
 	GLuint grassVAO, grassVBO;
+	GLuint quadVAO , quadVBO;
+	GLuint frameBuffer;
+	GLuint texColorBuffer;
+	GLuint renderBufferObject;
+
 
 
 private :
+
+
+	float quadVertices[24] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
 	float cubeVertices[180] = {
 		// Back face
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Bottom-left

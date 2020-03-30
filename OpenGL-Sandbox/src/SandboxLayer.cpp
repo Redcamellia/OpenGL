@@ -124,9 +124,52 @@ void SandboxLayer::OnAttach()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
-	m_textures.push_back(loadTexture("assets/textures/marble.jpg"));
+	glGenFramebuffers(1, &frameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glGenTextures(1, &texColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE , NULL );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	
+	glGenVertexArrays(1, &quadVAO);
+	glBindVertexArray(quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVAO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+
+
+	glGenRenderbuffers(1, &renderBufferObject);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+				GL_DEPTH_STENCIL_ATTACHMENT,
+							GL_RENDERBUFFER,
+						renderBufferObject);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "ERROR::FRAMEBUFFER:: framebuffer is not complete ... " << __FILE__ << "   " << __LINE__ << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	m_textures.push_back(loadTexture("assets/textures/container.jpg"));
 	m_textures.push_back(loadTexture("assets/textures/metal.png"));
 	m_textures.push_back(loadTexture("assets/textures/blending_transparent_window.png"));
+
+	m_shader->setInt("texture1", 0);
+	m_light_shader->setInt("sccreenTexture", 0);
+
 
 	m_shader->setInt("texture1", 0);
 	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), mouse_callback);
@@ -138,9 +181,7 @@ void SandboxLayer::OnAttach()
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
-	glFrontFace(GL_CW);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
@@ -179,6 +220,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glm::mat4 view = m_CameraController.GetCamera().GetViewMatrix();
 	glm::mat4 projection = m_CameraController.GetCamera().GetProjectionMatrix();
 	glm::mat4 model = glm::mat4(1.0f);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
 	glBindVertexArray(grassVAO);
 	glActiveTexture(GL_TEXTURE0);
@@ -226,10 +269,16 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	// floor
 
-	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_DEPTH_TEST);
 
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-
+	glUseProgram(m_light_shader->GetRendererID());
+	glBindVertexArray(quadVAO);
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
 
