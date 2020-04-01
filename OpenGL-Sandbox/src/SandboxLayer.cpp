@@ -210,6 +210,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glUseProgram(m_shader->GetRendererID());
 
+	
+
 	std::vector<glm::vec3> vegetation;
 	vegetation.push_back(glm::vec3(-1.6f, 0.0f, -0.28f));
 	vegetation.push_back(glm::vec3(1.7f, 0.0f, 0.81f));
@@ -223,18 +225,24 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glBindVertexArray(grassVAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textures[2]);
-	
-	for (int i = 0; i < vegetation.size(); i++)
-	{
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, vegetation[i]);
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		m_shader->setMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-	}
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	//for (int i = 0; i < vegetation.size(); i++)
+	//{
+	//	model = glm::mat4(1.0f);
+	//	model = glm::translate(model, vegetation[i]);
+	//	model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	//	m_shader->setMat4("model", model);
+	//	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//}
+
 
 
 
@@ -251,8 +259,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	m_shader->setMat4("view", view);
 
 	m_shader->setMat4("projection", projection);
-	// cubes
-
+	
 
 
 
@@ -267,13 +274,17 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
 	m_shader->setMat4("model", model);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	// floor
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 	glDisable(GL_DEPTH_TEST);
 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	
+
 
 	glUseProgram(m_light_shader->GetRendererID());
 	glBindVertexArray(quadVAO);
@@ -281,7 +292,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
-
+	
 
 
 
