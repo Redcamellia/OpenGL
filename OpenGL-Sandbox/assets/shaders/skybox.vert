@@ -11,6 +11,6 @@ void main()
 {
 
     TexCoord = aPos ;
-    gl_Position = projection * view * model * vec4(aPos , 1.0f) ; 
-
+    vec4 pos = projection * view * vec4(aPos , 1.0f) ; 
+    gl_Position = pos.xyww ;
 }

@@ -241,11 +241,9 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 	glUseProgram(m_skybox_shader->GetRendererID());
 	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_LEQUAL);
 	glm::mat4 costume = glm::mat4(1.0f);
-	costume = glm::translate(costume, m_CameraController.GetCamera().GetPosition());
-	costume = glm::scale(costume, glm::vec3(20.0f, 20.0f, 20.0f));
-	m_skybox_shader->setMat4("model", costume);
-	m_skybox_shader->setMat4("view", view);
+	m_skybox_shader->setMat4("view", glm::mat4(glm::mat3(view)));
 	m_skybox_shader->setMat4("projection", projection);
 	m_skybox_shader->setInt("skybox", 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -255,6 +253,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glDepthMask(GL_TRUE);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glBindVertexArray(0);
+	glDepthFunc(GL_LESS);
 
 	
 
