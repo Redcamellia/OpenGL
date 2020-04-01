@@ -17,12 +17,14 @@ public:
 private:
 	GLCore::Utils::PerspectiveCameraController m_CameraController;
 	std::vector<unsigned int> m_textures;
+	GLuint skyboxTexture;
 	GLCore::Utils::Shader * m_shader;
 	GLCore::Utils::Shader * m_light_shader;
+	GLCore::Utils::Shader * m_skybox_shader;
 	GLuint VAO; // vertex array object
 	GLuint VBO; // vertex buffer object
 	GLuint EBO; // element buffer object
-	GLuint lightVAO;
+	GLuint skyboxVAO, skyboxVBO;
 	GLuint planeVAO, planeVBO;
 	GLuint grassVAO, grassVBO;
 	GLuint quadVAO , quadVBO;
@@ -101,4 +103,6 @@ private :
 		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
 		 5.0f, -0.5f, -5.0f,  2.0f, 2.0f
 	};
+
+	
 };
