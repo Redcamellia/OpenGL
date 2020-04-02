@@ -53,42 +53,14 @@ void SandboxLayer::OnAttach()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glBindVertexArray(0);
 	// plane VAO
 
-	glGenVertexArrays(1, &planeVAO);
-	glGenBuffers(1, &planeVBO);
-	glBindVertexArray(planeVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glBindVertexArray(0);
 
-	float grassPositions[] =
-	{
-		 0.5f , 0.5f  , 0.0f , 1.0f , 1.0f ,
-		-0.5f , -0.5f , 0.0f , 0.0f , 0.0f ,
-		 0.5f , -0.5f , 0.0f , 1.0f , 0.0f ,
-		 0.5f , 0.5f  , 0.0f , 1.0f , 1.0f ,
-		-0.5f , 0.5f  , 0.0f , 0.0f , 1.0f ,
-		-0.5f , -0.5f , 0.0f , 0.0f , 0.0f 
-	};
 
-	glGenVertexArrays(1, &grassVAO);
-	glGenBuffers(1, &grassVBO);
-	glBindVertexArray(grassVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(grassPositions), &grassPositions, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -182,13 +154,11 @@ void SandboxLayer::OnAttach()
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	m_textures.push_back(loadTexture("assets/textures/container.jpg"));
-	m_textures.push_back(loadTexture("assets/textures/metal.png"));
-	m_textures.push_back(loadTexture("assets/textures/blending_transparent_window.png"));
+
 	skyboxTexture = loadSkyBox();
 
 
-	m_shader->setInt("texture1", 0);
+	m_shader->setInt("skybox", 0);
 	m_light_shader->setInt("sscreenTexture", 0); // this guy is working i dont know why ...
 
 
@@ -259,21 +229,17 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 
 	glUseProgram(m_shader->GetRendererID());
-	glBindVertexArray(planeVAO);
-	glBindTexture(GL_TEXTURE_2D, m_textures[1]);
 	m_shader->setMat4("model", glm::mat4(1.0f));
 	m_shader->setMat4("view", view);
 	m_shader->setMat4("projection", projection);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);
+	m_shader->setVec3("cameraPos", m_CameraController.GetCamera().GetPosition());
 
 	m_CameraController.OnUpdate(ts);
 	m_CameraController.MouseProcess(cameraGlobal::xoffset, cameraGlobal::yoffset);
 
 
 	glBindVertexArray(VAO);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
 	m_shader->setMat4("model", model);
@@ -282,7 +248,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
 	m_shader->setMat4("model", model);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 
 
