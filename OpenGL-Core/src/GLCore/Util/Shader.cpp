@@ -95,23 +95,33 @@ namespace GLCore::Utils {
 		return shader;
 	}
 
-	Shader* Shader::FromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	Shader* Shader::FromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath 
+		, const std::string & geometryShaderPath )
 	{
 		Shader* shader = new Shader();
-		shader->LoadFromGLSLTextFiles(vertexShaderPath, fragmentShaderPath);
+		shader->LoadFromGLSLTextFiles(vertexShaderPath, fragmentShaderPath , geometryShaderPath);
 		return shader;
 	}
 	
-	void Shader::LoadFromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	void Shader::LoadFromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath 
+		, const std::string& geometryShaderPath )
 	{
 		std::string vertexSource = ReadFileAsString(vertexShaderPath);
 		std::string fragmentSource = ReadFileAsString(fragmentShaderPath);
+		std::string geometrySource;
+		if(geometryShaderPath != "no")
+		geometrySource = ReadFileAsString(geometryShaderPath);
 
 		GLuint program = glCreateProgram();
 		int glShaderIDIndex = 0;
 			
 		GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, vertexSource);
 		glAttachShader(program, vertexShader);
+		if (geometryShaderPath != "no")
+		{
+			GLuint geometryShader = CompileShader(GL_GEOMETRY_SHADER, geometrySource);
+			glAttachShader(program, geometryShader);
+		}
 		GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
 		glAttachShader(program, fragmentShader);
 

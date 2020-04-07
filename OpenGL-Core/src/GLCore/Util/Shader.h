@@ -13,7 +13,8 @@ namespace GLCore::Utils {
 
 		GLuint GetRendererID() { return m_RendererID; }
 
-		static Shader* FromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		static Shader* FromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath 
+			, const std::string & geometryShaderPath = "no");
 
 
 
@@ -78,7 +79,8 @@ namespace GLCore::Utils {
 	private:
 		Shader() = default;
 
-		void LoadFromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		void LoadFromGLSLTextFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath 
+			, const std::string & geometryShaderPath = "no");
 		GLuint CompileShader(GLenum type, const std::string& source);
 	private:
 		GLuint m_RendererID;
