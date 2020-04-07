@@ -34,8 +34,8 @@ namespace GLCore::Utils {
 
 	void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch)
 	{
-		xoffset = xoffset / 1000;
-		yoffset = yoffset / 1000;
+		xoffset = xoffset/10 ;
+		yoffset = yoffset/10 ;
 
 		// the bloody function pointer passing should be done in the camera controller ...
 		xoffset *= MouseSensitivity;

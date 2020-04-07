@@ -1,34 +1,25 @@
-#version 430 core
-
-layout (points) in ;
-layout (triangle_strip , max_vertices = 5) out ;
+#version 330 core
+layout (triangles) in;
+layout (line_strip, max_vertices = 6) out;
 
 in VS_OUT {
-    vec3 color ;
-}gs_in[];
+    vec3 normal;
+} gs_in[];
 
-out vec3 fColor ;
+const float MAGNITUDE = 0.008;
 
-void build_house(vec4 position)
+void GenerateLine(int index)
 {
-    fColor = gs_in[0].color ;
-    gl_Position = position + vec4(-0.2 , -0.2 , 0.0 , 0.0);
+    gl_Position = gl_in[index].gl_Position;
     EmitVertex();
-    gl_Position = position + vec4(0.2 , -0.2 , 0.0 , 0.0);
+    gl_Position = gl_in[index].gl_Position + vec4(gs_in[index].normal, 0.0) * MAGNITUDE;
     EmitVertex();
-    gl_Position = position + vec4(-0.2 , 0.2 , 0.0 , 0.0);
-    EmitVertex();
-    gl_Position = position + vec4(0.2 , 0.2 , 0.0 , 0.0);
-    EmitVertex();
-    gl_Position = position + vec4(0.0 , 0.4 , 0.0 ,0.0);
-    fColor = vec3(1.0f , 1.0f , 1.0f);
-    EmitVertex();
-
     EndPrimitive();
-
 }
 
 void main()
 {
-    build_house(gl_in[0].gl_Position);
+    GenerateLine(0); // first vertex normal
+    GenerateLine(1); // second vertex normal
+    GenerateLine(2); // third vertex normal
 }

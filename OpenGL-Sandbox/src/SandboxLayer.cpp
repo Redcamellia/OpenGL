@@ -15,21 +15,32 @@ namespace cameraGlobal {
 	float lastX = 0;
 	float lastY = 0;
 	bool firstMouse = true;
-	float xoffset = 0;
-	float yoffset = 0;
+
 }
+
+GLCore::Utils::PerspectiveCameraController g_CameraController(glm::vec3(0.0f, 0.0f, 0.0f),
+	glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 using namespace cameraGlobal;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	xoffset = xpos;
-	yoffset = ypos;
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
 
+
+
+	float xoffset = xpos - lastX;
+	float yoffset = ypos - lastY ;
+
+	lastX = xpos;
+	lastY = ypos;
+	g_CameraController.MouseProcess(xoffset, yoffset);
 }
 
-SandboxLayer::SandboxLayer()
-	: m_CameraController(glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f) 
-	
+SandboxLayer::SandboxLayer()	
 {
 	
 }
@@ -42,29 +53,21 @@ void SandboxLayer::OnAttach()
 {
 	EnableGLDebugging();
 
-	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert", "assets/shaders/frag.frag", "assets/shaders/geometry.gs");
-
-	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), mouse_callback);
+	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert"
+		, "assets/shaders/frag.frag"/*,
+		"assets/shaders/geometry.gs"*/);
+	m_normal_shader = Shader::FromGLSLTextFiles("assets/shaders/lightVertex.vert"
+		, "assets/shaders/lightFragment.frag"
+		, "assets/shaders/geometry.gs");
+	nanosuit = Model("assets/nanosuit/nanosuit.obj");
+	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(),
+		mouse_callback);
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	float points[] = {
-		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
-		-0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
-	};
-	unsigned int VBO, VAO;
-	glGenBuffers(1, &VBO);
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+	m_shader->setInt("texture_diffuse1", 0);
 
+	glEnable(GL_DEPTH_TEST);
 
 
 
@@ -90,24 +93,29 @@ void SandboxLayer::OnEvent(Event& event)
 
 void SandboxLayer::OnUpdate(Timestep ts)
 {
-	glUseProgram(m_shader->GetRendererID());
 
-
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
+	g_CameraController.OnUpdate(ts);
 
-
-	glm::mat4 view = m_CameraController.GetCamera().GetViewMatrix();
-	glm::mat4 projection = m_CameraController.GetCamera().GetProjectionMatrix();
+	glm::mat4 view = g_CameraController.GetCamera().GetViewMatrix();
+	glm::mat4 projection = g_CameraController.GetCamera().GetProjectionMatrix();
 	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -2.0f, -3.5f));
+	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 
-	m_CameraController.OnUpdate(ts);
-	m_CameraController.MouseProcess(cameraGlobal::xoffset, cameraGlobal::yoffset);
+	//m_shader->setMat4("projection", projection);
+	//m_shader->setMat4("model", model);
+	//m_shader->setMat4("view", view);
+	//nanosuit.draw(*m_shader);
 
 
+	m_normal_shader->setMat4("projection", projection);
+	m_normal_shader->setMat4("model", model);
+	m_normal_shader->setMat4("view", view);
+	nanosuit.draw(*m_normal_shader);
 
-	glDrawArrays(GL_POINTS, 0, 4);
 
 }
 
