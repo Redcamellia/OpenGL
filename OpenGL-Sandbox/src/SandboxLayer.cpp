@@ -150,6 +150,9 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glm::mat4 projection = g_CameraController.GetCamera().GetProjectionMatrix();
 	glm::mat4 model = glm::mat4(1.0f);
 
+	model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	m_shader->setMat4("rotation", model);
+
 	glBindVertexArray(VAO);
 	glDrawArraysInstanced(GL_TRIANGLES, 0, 6 , 100);
 
