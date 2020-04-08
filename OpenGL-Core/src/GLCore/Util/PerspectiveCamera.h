@@ -46,7 +46,7 @@ namespace GLCore::Utils {
 			Yaw = yaw;
 			Pitch = pitch;
 			updateCameraVectors();
-			projection = glm::perspective(glm::radians(40.0f), (float)(800 / 600), 0.1f, 100.0f);
+			projection = glm::perspective(glm::radians(40.0f), (float)(800 / 600), 0.1f, 1000.0f);
 		}
 
 		// Returns the view matrix calculated using Euler Angles and the LookAt Matrix

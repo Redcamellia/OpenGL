@@ -39,17 +39,17 @@ namespace GLCore::Utils
 				glfwSetWindowShouldClose(window, true);
 
 			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				m_Camera.ProcessKeyboard(FORWARD, ts);
+				m_Camera.ProcessKeyboard(FORWARD, ts * 5);
 			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				m_Camera.ProcessKeyboard(BACKWARD, ts);
+				m_Camera.ProcessKeyboard(BACKWARD, ts * 5);
 			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				m_Camera.ProcessKeyboard(LEFT, ts);
+				m_Camera.ProcessKeyboard(LEFT, ts * 5);
 			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				m_Camera.ProcessKeyboard(RIGHT, ts);
+				m_Camera.ProcessKeyboard(RIGHT, ts * 5);
 			if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-				m_Camera.ProcessKeyboard(UPWARD, ts);
+				m_Camera.ProcessKeyboard(UPWARD, ts * 5);
 			if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-				m_Camera.ProcessKeyboard(DOWN, ts);
+				m_Camera.ProcessKeyboard(DOWN, ts * 5);
 
 		}
 		

@@ -22,9 +22,9 @@ private:
 	GLuint VAO; // vertex array object
 	GLuint VBO; // vertex buffer object
 	GLuint EBO; // element buffer object
-	Model nanosuit;
-
-
+	Model rock;
+	Model planet;
+	glm::mat4* modelMatrices;
 
 private :
 
