@@ -27,7 +27,7 @@ namespace GLCore::Utils {
 
 	Shader::~Shader()
 	{
-		glDeleteProgram(m_RendererID);
+		/*glDeleteProgram(m_RendererID);*/
 	}
 
 	unsigned int Shader::loadTexture(const char* path)

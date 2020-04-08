@@ -1,13 +1,12 @@
 #include "Model.h"
 
-void Model::draw(GLCore::Utils::Shader arg_shader)
+void Model::draw(GLCore::Utils::Shader& arg_shader)
 {
 	glUseProgram(arg_shader.GetRendererID());
 	for (int i = 0; i < meshes.size(); i++)
 	{
 		meshes[i].draw(arg_shader);
 	}
-
 }
 
 unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma = false)

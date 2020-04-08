@@ -53,25 +53,72 @@ void SandboxLayer::OnAttach()
 {
 	EnableGLDebugging();
 
-	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert"
-		, "assets/shaders/frag.frag"/*,
-		"assets/shaders/geometry.gs"*/);
-	m_normal_shader = Shader::FromGLSLTextFiles("assets/shaders/lightVertex.vert"
-		, "assets/shaders/lightFragment.frag"
-		, "assets/shaders/geometry.gs");
-	nanosuit = Model("assets/nanosuit/nanosuit.obj");
+
+	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert", "assets/shaders/frag.frag");
+
+	float quadVertices[] = {
+		// positions // colors
+		-0.05f, 0.05f , 1.0f, 0.0f, 0.0f,
+		0.05f , -0.05f, 0.0f, 1.0f, 0.0f,
+		-0.05f, -0.05f, 0.0f, 0.0f, 1.0f,
+		-0.05f, 0.05f , 1.0f, 0.0f, 0.0f,
+		0.05f , -0.05f, 0.0f, 1.0f, 0.0f,
+		0.05f , 0.05f , 0.0f, 1.0f, 1.0f
+	};
+
+
+
+
+	glm::vec2 translations[100];
+	int index = 0;
+	float offset = 0.1f;
+	for ( int y = -10; y < 10; y+=2)
+	{
+		for ( int x = -10; x < 10; x += 2)
+		{
+			glm::vec2 translation;
+			translation.x = (float)x / 10.0f + offset;
+			translation.y = (float)y / 10.0f + offset;
+			translations[index++] = translation;
+			
+		}
+	}
+	glUseProgram(m_shader->GetRendererID());
+
+
+	
+
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices) , &quadVertices, GL_STATIC_DRAW);
+	
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+	GLuint instanceVBO;
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 100, &translations[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glVertexAttribDivisor(2, 1);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(),
 		mouse_callback);
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	m_shader->setInt("texture_diffuse1", 0);
 
 	glEnable(GL_DEPTH_TEST);
-
-
-
-
 
 	// Init here
 }
@@ -102,19 +149,9 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glm::mat4 view = g_CameraController.GetCamera().GetViewMatrix();
 	glm::mat4 projection = g_CameraController.GetCamera().GetProjectionMatrix();
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -2.0f, -3.5f));
-	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 
-	//m_shader->setMat4("projection", projection);
-	//m_shader->setMat4("model", model);
-	//m_shader->setMat4("view", view);
-	//nanosuit.draw(*m_shader);
-
-
-	m_normal_shader->setMat4("projection", projection);
-	m_normal_shader->setMat4("model", model);
-	m_normal_shader->setMat4("view", view);
-	nanosuit.draw(*m_normal_shader);
+	glBindVertexArray(VAO);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 6 , 100);
 
 
 }

@@ -15,7 +15,7 @@ public :
 		loadModel(path);
 	}
 	Model() {}
-	void draw(GLCore::Utils::Shader arg_shader);
+	void draw(GLCore::Utils::Shader& arg_shader);
 
 private:
 	std::vector<Mesh> meshes;
