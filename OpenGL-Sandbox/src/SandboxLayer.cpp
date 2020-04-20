@@ -18,7 +18,7 @@ namespace cameraGlobal {
 
 }
 
-GLCore::Utils::PerspectiveCameraController g_CameraController(glm::vec3(0.0f, 0.0f, 55.0f),
+GLCore::Utils::PerspectiveCameraController g_CameraController(glm::vec3(0.0f, 0.0f, 3.0f),
 	glm::vec3(0.0f, 1.0f, 0.0f), -90.0f ,0.0f);
 using namespace cameraGlobal;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -56,57 +56,23 @@ void SandboxLayer::OnAttach()
 
 	m_shader = Shader::FromGLSLTextFiles("assets/shaders/vertex.vert", "assets/shaders/frag.frag");
 
-
-
-
-
-
-
 	glfwSetCursorPosCallback((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(),
 		mouse_callback);
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	rock = Model("assets/textures/rock/rock.obj");
-	planet = Model("assets/textures/planet/planet.obj");
 
-
-	unsigned int amount = 20000;
-	
-	modelMatrices = new glm::mat4[amount];
-	srand(glfwGetTime());
-	float radius = 50.0f;
-	float offset = 4.5f;
-	for (unsigned int i = 0; i < amount; i++)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		// 1. translation: displace along circle with 'radius' in range [-offset, offset]
-		float angle = (float)i / (float)amount * 360.0f;
-		float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-		float x = sin(angle) * radius + displacement;
-		displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-		float y = displacement * 0.4f; // keep height of asteroid field smaller compared to width of x and z
-		displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-		float z = cos(angle) * radius + displacement;
-		model = glm::translate(model, glm::vec3(x, y, z));
-
-		// 2. scale: Scale between 0.05 and 0.25f
-		float scale = (rand() % 20) / 100.0f + 0.05;
-		model = glm::scale(model, glm::vec3(scale));
-
-		// 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
-		float rotAngle = (rand() % 360);
-		model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
-
-		// 4. now add to list of matrices
-		modelMatrices[i] = model;
-	}
 	glUseProgram(m_shader->GetRendererID());
-
-
-
-
-
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(position), position, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBindVertexArray(0);
+	
+	glEnable(GL_MULTISAMPLE);
 
 
 	glEnable(GL_DEPTH_TEST);
@@ -132,28 +98,19 @@ void SandboxLayer::OnEvent(Event& event)
 void SandboxLayer::OnUpdate(Timestep ts)
 {
 
+	g_CameraController.OnUpdate(ts);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
 
 	glUseProgram(m_shader->GetRendererID());
 
-	m_shader->setMat4("projection", g_CameraController.GetCamera().GetProjectionMatrix());
+	m_shader->setMat4("model", glm::mat4(1.0f));
 	m_shader->setMat4("view", g_CameraController.GetCamera().GetViewMatrix());
+	m_shader->setMat4("projection", g_CameraController.GetCamera().GetProjectionMatrix());
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	glm::mat4 model(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -3.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-	m_shader->setMat4("model", model);
-	planet.draw(*m_shader);
-
-	for (unsigned int i = 0; i < 20000; i++)
-	{
-		m_shader->setMat4("model", modelMatrices[i]);
-		rock.draw(*m_shader);
-	}
-
-
-	g_CameraController.OnUpdate(ts);
 
 
 

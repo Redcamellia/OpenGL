@@ -16,7 +16,8 @@ public :
 	}
 	Model() {}
 	void draw(GLCore::Utils::Shader& arg_shader);
-
+	std::vector<Mesh> getMeshes();
+	std::vector<Texture>& getTextures();
 private:
 	std::vector<Mesh> meshes;
 	std::string directory;

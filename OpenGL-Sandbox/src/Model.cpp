@@ -9,6 +9,16 @@ void Model::draw(GLCore::Utils::Shader& arg_shader)
 	}
 }
 
+std::vector<Mesh> Model::getMeshes()
+{
+	return this->meshes;
+}
+
+std::vector<Texture>& Model::getTextures()
+{
+	return this->textures_loaded;
+}
+
 unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma = false)
 {
 	std::string filename = std::string(path);
@@ -118,15 +128,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		else
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
-		vector.x = mesh->mTangents[i].x;
-		vector.y = mesh->mTangents[i].y;
-		vector.z = mesh->mTangents[i].z;
+		//vector.x = mesh->mTangents[i].x;
+		//vector.y = mesh->mTangents[i].y;
+		//vector.z = mesh->mTangents[i].z;
 
 		//vertex.Tangent = vector;
 		
-		vector.x = mesh->mBitangents[i].x;
-		vector.y = mesh->mBitangents[i].y;
-		vector.z = mesh->mBitangents[i].z;
+		//vector.x = mesh->mBitangents[i].x;
+		//vector.y = mesh->mBitangents[i].y;
+		//vector.z = mesh->mBitangents[i].z;
 
 	/*	vertex.Bitangent = vector;*/
 

@@ -45,7 +45,7 @@ namespace GLCore {
 			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
-
+		glfwWindowHint(GLFW_SAMPLES, 4);
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(),nullptr, nullptr); 
 		// for avoiding the full screen compile you can replace get primary monitor with the nullptr ...
 
