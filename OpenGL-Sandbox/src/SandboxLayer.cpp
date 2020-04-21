@@ -61,6 +61,18 @@ void SandboxLayer::OnAttach()
 	glfwSetInputMode((GLFWwindow*)GLCore::Application::Get().GetWindow().GetNativeWindow()
 			, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	float position[] = { 
+		// positions            // normals         // texcoords
+		 20.0f, -0.5f,  20.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+		-20.0f, -0.5f,  20.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+		-20.0f, -0.5f, -20.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
+
+		 20.0f, -0.5f,  20.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+		-20.0f, -0.5f, -20.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
+		 20.0f, -0.5f, -20.0f,  0.0f, 1.0f, 0.0f,  10.0f, 10.0f
+	}; 
+
+	m_textures.push_back(loadTexture("assets/textures/wood.png"));
 
 	glUseProgram(m_shader->GetRendererID());
 	glGenVertexArrays(1, &VAO);
@@ -69,9 +81,12 @@ void SandboxLayer::OnAttach()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(position), position, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glBindVertexArray(0);
-	
 	glEnable(GL_MULTISAMPLE);
 
 
@@ -100,18 +115,22 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 	g_CameraController.OnUpdate(ts);
 
+
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	glUseProgram(m_shader->GetRendererID());
 
+	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
+
+	m_shader->setInt("floorTexture", 0);
+	m_shader->setVec3("lightPos", glm::vec3(0.0f,1.0f,0.0f));
 	m_shader->setMat4("model", glm::mat4(1.0f));
 	m_shader->setMat4("view", g_CameraController.GetCamera().GetViewMatrix());
 	m_shader->setMat4("projection", g_CameraController.GetCamera().GetProjectionMatrix());
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
 
